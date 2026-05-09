@@ -34,10 +34,14 @@ export function About() {
         />
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr] lg:gap-12">
-          {/* Photo placeholder avec ring gradient animé */}
-          <Reveal className="flex justify-center lg:justify-start">
-            <div className="relative">
-              {/* Anneau gradient en rotation */}
+          {/* Photo placeholder avec ring gradient animé.
+              `items-start` empêche le stretch vertical de la cellule grid (la
+              colonne bio est plus haute → sans ça, le wrapper devenait une
+              capsule). `size-60` verrouille explicitement la taille pour que
+              les `inset-*` produisent un cercle parfait. */}
+          <Reveal className="flex items-start justify-center lg:justify-start">
+            <div className="relative size-60">
+              {/* Halo flou (8 px de débord) */}
               <motion.div
                 aria-hidden
                 className="absolute -inset-2 rounded-full opacity-70 blur-md"
@@ -48,10 +52,10 @@ export function About() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
-              {/* Anneau gradient net */}
+              {/* Anneau net qui couvre toute la zone — ne dépasse pas */}
               <motion.div
                 aria-hidden
-                className="absolute -inset-[3px] rounded-full"
+                className="absolute inset-0 rounded-full"
                 style={{
                   background:
                     "conic-gradient(from 0deg, var(--accent-from), var(--accent-to), var(--accent-from))",
@@ -59,9 +63,9 @@ export function About() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
-              <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full bg-(--card)">
-                {/* Placeholder : initiales en gros, gradient subtle.
-                    Remplace par <Image src="/avatar.jpg" /> quand t'auras une photo. */}
+              {/* Avatar : 3 px plus petit que l'anneau → laisse le ring visible.
+                  Remplace par <Image src="/avatar.jpg" fill /> quand t'auras une photo. */}
+              <div className="absolute inset-[3px] flex items-center justify-center overflow-hidden rounded-full bg-(--card)">
                 <div
                   className="absolute inset-0 opacity-30"
                   style={{
