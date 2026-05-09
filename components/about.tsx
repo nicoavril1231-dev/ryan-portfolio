@@ -41,31 +41,47 @@ export function About() {
               les `inset-*` produisent un cercle parfait. */}
           <Reveal className="flex items-start justify-center lg:justify-start">
             <div className="relative size-60">
-              {/* Halo flou (8 px de débord) */}
-              <motion.div
+              {/* 1. Halo statique large — ambient glow qui ne bouge pas */}
+              <div
                 aria-hidden
-                className="absolute -inset-2 rounded-full opacity-70 blur-md"
+                className="absolute -inset-6 rounded-full opacity-50 blur-3xl"
                 style={{
                   background:
-                    "conic-gradient(from 0deg, var(--accent-from), var(--accent-to), var(--accent-from))",
+                    "radial-gradient(circle, var(--accent-from) 0%, transparent 70%)",
                 }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
-              {/* Anneau net qui couvre toute la zone — ne dépasse pas */}
+
+              {/* 2. Anneau qui orbite — croissant lumineux ~120° avec dégradé,
+                  reste transparent. Avec un ring visible de 5 px, la rotation
+                  saute aux yeux. Duration 6 s, linéaire pour un mouvement
+                  calme et continu. */}
               <motion.div
                 aria-hidden
                 className="absolute inset-0 rounded-full"
                 style={{
                   background:
-                    "conic-gradient(from 0deg, var(--accent-from), var(--accent-to), var(--accent-from))",
+                    "conic-gradient(from 0deg, var(--accent-from) 0deg, var(--accent-to) 90deg, transparent 210deg, transparent 360deg)",
                 }}
                 animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
               />
-              {/* Avatar : 3 px plus petit que l'anneau → laisse le ring visible.
-                  Remplace par <Image src="/avatar.jpg" fill /> quand t'auras une photo. */}
-              <div className="absolute inset-[3px] flex items-center justify-center overflow-hidden rounded-full bg-(--card)">
+
+              {/* 3. Halo plus doux qui suit le croissant — accentue la traînée
+                  comme une "comète" autour du nom */}
+              <motion.div
+                aria-hidden
+                className="absolute -inset-1 rounded-full opacity-60 blur-md"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, var(--accent-from) 0deg, var(--accent-to) 90deg, transparent 200deg, transparent 360deg)",
+                }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+              />
+
+              {/* 4. Avatar : 5 px plus petit que l'anneau → laisse 5 px de ring
+                  visible. Remplace par <Image src="/avatar.jpg" fill /> plus tard. */}
+              <div className="absolute inset-[5px] flex items-center justify-center overflow-hidden rounded-full bg-(--card)">
                 <div
                   className="absolute inset-0 opacity-30"
                   style={{
