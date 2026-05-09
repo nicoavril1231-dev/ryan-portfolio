@@ -23,11 +23,12 @@ export const site = {
 
 export type SiteConfig = typeof site;
 
-// Sections ancrées dans la nav (sidebar émoji-reveal).
+// Sections ancrées dans la nav. `iconKey` mappe vers une icône SVG animée
+// définie dans components/nav-icons.tsx — pas d'emoji, pour rester premium.
 export const navLinks = [
-  { href: "#work", label: "Work", emoji: "🛠️" },
-  { href: "#about", label: "About", emoji: "👋" },
-  { href: "#skills", label: "Skills", emoji: "⚡" },
-  { href: "#journey", label: "Journey", emoji: "🗺️" },
-  { href: "#contact", label: "Contact", emoji: "✉️" },
+  { href: "#work", label: "Work", iconKey: "work" },
+  { href: "#about", label: "About", iconKey: "about" },
+  { href: "#skills", label: "Skills", iconKey: "skills" },
+  { href: "#journey", label: "Journey", iconKey: "journey" },
+  { href: "#contact", label: "Contact", iconKey: "contact" },
 ] as const;

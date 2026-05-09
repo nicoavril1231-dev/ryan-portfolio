@@ -4,14 +4,15 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { NAV_ICONS, type NavIconKey } from "@/components/nav-icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { navLinks } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Navigation à deux modes :
-// - Desktop (md+) : sidebar fixe à gauche, w-16 par défaut → w-52 au hover.
-//   Les emojis restent en place, le label "se déroule" vers la droite.
-// - Mobile : pill flottante en bas, emojis seuls.
+// - Desktop (md+) : sidebar fixe à gauche, w-16 → w-52 au hover.
+//   Icônes SVG animées (motion variants), labels qui se déroulent.
+// - Mobile : pill flottante en bas, icônes seules + theme toggle.
 // Pas de logo "RA" — la sidebar parle d'elle-même.
 
 export function Navigation() {
@@ -27,8 +28,6 @@ export function Navigation() {
 // Desktop : sidebar fixe à gauche
 // -----------------------------------------------------------------------------
 function DesktopSidebar() {
-  // L'expansion se fait sur hover (group hover) — purement CSS, pas d'état.
-  // Z-50 pour passer par-dessus toutes les sections sans pousser le contenu.
   return (
     <motion.aside
       initial={{ x: -64, opacity: 0 }}
@@ -66,38 +65,47 @@ function DesktopSidebar() {
 interface SidebarLinkProps {
   href: string;
   label: string;
-  emoji: string;
+  iconKey: NavIconKey;
 }
 
-function SidebarLink({ href, label, emoji }: SidebarLinkProps) {
+function SidebarLink({ href, label, iconKey }: SidebarLinkProps) {
+  const Icon = NAV_ICONS[iconKey];
   return (
-    <Link
-      href={href}
-      className={cn(
-        "relative flex items-center gap-3 rounded-lg px-2.5 py-3",
-        "text-sm font-medium text-(--muted-foreground)",
-        "transition-colors hover:bg-(--foreground)/[0.05] hover:text-(--foreground)",
-        "dark:hover:bg-white/[0.05]",
-      )}
+    // Wrapper motion : `whileHover` propage la variante "hover" aux enfants
+    // motion.* via le variants tree → l'icône joue son anim sans state local.
+    <motion.div
+      initial="rest"
+      animate="rest"
+      whileHover="hover"
+      className="rounded-lg"
     >
-      {/* Emoji fixé à gauche */}
-      <span
-        aria-hidden
-        className="flex size-6 shrink-0 items-center justify-center text-lg leading-none"
-      >
-        {emoji}
-      </span>
-      {/* Label révélé en fade + translate quand la sidebar s'élargit */}
-      <span
+      <Link
+        href={href}
         className={cn(
-          "whitespace-nowrap opacity-0 -translate-x-2",
-          "transition-[opacity,transform] duration-300 ease-out",
-          "group-hover:opacity-100 group-hover:translate-x-0",
+          "relative flex items-center gap-3 rounded-lg px-2.5 py-3",
+          "text-sm font-medium text-(--muted-foreground)",
+          "transition-colors hover:bg-(--foreground)/[0.05] hover:text-(--foreground)",
+          "dark:hover:bg-white/[0.05]",
         )}
       >
-        {label}
-      </span>
-    </Link>
+        <span
+          aria-hidden
+          className="flex size-6 shrink-0 items-center justify-center"
+        >
+          <Icon />
+        </span>
+        {/* Label révélé en fade + translate quand la sidebar s'élargit */}
+        <span
+          className={cn(
+            "whitespace-nowrap opacity-0 -translate-x-2",
+            "transition-[opacity,transform] duration-300 ease-out",
+            "group-hover:opacity-100 group-hover:translate-x-0",
+          )}
+        >
+          {label}
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -105,9 +113,6 @@ function SidebarLink({ href, label, emoji }: SidebarLinkProps) {
 // Mobile : pill flottante en bas
 // -----------------------------------------------------------------------------
 function MobileBottomBar() {
-  // On bloque le scroll horizontal si l'utilisateur clique sur un lien et que
-  // la pill devrait disparaître pendant la transition. Pas de logique d'état
-  // ici — simple anchor scroll.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -126,21 +131,35 @@ function MobileBottomBar() {
       )}
     >
       {navLinks.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          aria-label={link.label}
-          className={cn(
-            "flex size-10 items-center justify-center rounded-full text-lg leading-none",
-            "transition-colors hover:bg-(--foreground)/[0.06]",
-            "dark:hover:bg-white/[0.08]",
-          )}
-        >
-          <span aria-hidden>{link.emoji}</span>
-        </Link>
+        <MobileNavItem key={link.href} {...link} />
       ))}
       <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
       <ThemeToggle />
     </motion.nav>
+  );
+}
+
+function MobileNavItem({ href, label, iconKey }: SidebarLinkProps) {
+  const Icon = NAV_ICONS[iconKey];
+  return (
+    // whileTap pour donner du feedback au tap mobile (pas de hover sur touch).
+    <motion.div
+      initial="rest"
+      animate="rest"
+      whileTap="hover"
+      whileHover="hover"
+    >
+      <Link
+        href={href}
+        aria-label={label}
+        className={cn(
+          "flex size-10 items-center justify-center rounded-full text-(--muted-foreground)",
+          "transition-colors hover:bg-(--foreground)/[0.06] hover:text-(--foreground)",
+          "dark:hover:bg-white/[0.08]",
+        )}
+      >
+        <Icon />
+      </Link>
+    </motion.div>
   );
 }
