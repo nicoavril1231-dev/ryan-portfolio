@@ -24,8 +24,8 @@ const stats = [
 
 export function About() {
   return (
-    <section id="about" className="relative py-24 md:py-32">
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6">
+    <section id="about" className="relative py-20 md:py-24">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="01"
           eyebrow="About"
@@ -33,7 +33,7 @@ export function About() {
           description="Étudiant développeur basé à Nice. J’aime les interfaces qui semblent simples mais cachent du soin partout : transitions millimétrées, composants réutilisables, perfs au cordeau."
         />
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[320px_1fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Photo placeholder avec ring gradient animé */}
           <Reveal className="flex justify-center lg:justify-start">
             <div className="relative">
@@ -59,7 +59,7 @@ export function About() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               />
-              <div className="relative flex h-72 w-72 items-center justify-center overflow-hidden rounded-full bg-(--card)">
+              <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full bg-(--card)">
                 {/* Placeholder : initiales en gros, gradient subtle.
                     Remplace par <Image src="/avatar.jpg" /> quand t'auras une photo. */}
                 <div
@@ -69,7 +69,7 @@ export function About() {
                       "radial-gradient(circle at 30% 30%, var(--accent-from), transparent 60%)",
                   }}
                 />
-                <span className="relative font-mono text-7xl font-semibold tracking-tight text-(--foreground)">
+                <span className="relative font-mono text-6xl font-semibold tracking-tight text-(--foreground)">
                   {site.initials}
                 </span>
               </div>
@@ -77,7 +77,7 @@ export function About() {
           </Reveal>
 
           {/* Bio + stats */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
             <Reveal delay={0.1}>
               <div className="space-y-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg">
                 <p>

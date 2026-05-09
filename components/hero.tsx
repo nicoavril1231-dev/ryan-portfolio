@@ -37,7 +37,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative isolate flex min-h-[100svh] w-full items-center overflow-hidden pt-16"
+      className="relative isolate flex min-h-[92svh] w-full items-center overflow-hidden"
     >
       {/* Couches d'arrière-plan, du plus profond au plus surfacique */}
       <Orbs />
@@ -59,7 +59,7 @@ export function Hero() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="relative mx-auto flex w-full max-w-6xl flex-col items-start gap-8 px-6 py-16 md:py-24"
+        className="relative mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-6 py-12 md:gap-7 md:py-16"
       >
         {/* Badge statut — dot pulsant + dispo */}
         <motion.div variants={item}>
@@ -141,7 +141,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 sm:block"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

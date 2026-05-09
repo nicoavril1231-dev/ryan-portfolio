@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export function Skills() {
   return (
-    <section id="skills" className="relative py-24 md:py-32">
+    <section id="skills" className="relative py-20 md:py-24">
       {/* Halo subtle derrière la grille pour l'aération */}
       <div
         aria-hidden
@@ -22,7 +22,7 @@ export function Skills() {
         }}
       />
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="02"
           eyebrow="Stack"
@@ -30,20 +30,18 @@ export function Skills() {
           description="Une liste honnête : ce que je connais bien, pas une vitrine de mots-clés. J’apprends vite ce qui manque selon le projet."
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {skillCategories.map((cat, i) => (
             <Reveal key={cat.id} delay={i * 0.05}>
-              <Card className="h-full p-6 sm:p-7">
-                <div className="mb-5 flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">
-                      0{i + 1}
-                    </div>
-                    <h3 className="mt-1 text-xl font-semibold tracking-tight text-(--foreground)">
-                      {cat.title}
-                    </h3>
+              <Card className="flex h-full flex-col gap-5 p-5 sm:p-6">
+                <div className="flex flex-col gap-1.5">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">
+                    0{i + 1}
                   </div>
-                  <p className="max-w-[180px] text-right text-xs leading-relaxed text-(--muted-foreground)">
+                  <h3 className="text-lg font-semibold tracking-tight text-(--foreground)">
+                    {cat.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed text-(--muted-foreground)">
                     {cat.description}
                   </p>
                 </div>

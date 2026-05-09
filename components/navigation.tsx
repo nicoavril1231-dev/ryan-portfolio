@@ -1,147 +1,146 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
-import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { navLinks } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { navLinks, site } from "@/lib/site";
 
-// Nav sticky avec backdrop-blur qui s'intensifie au scroll.
-// Mobile : panneau plein écran qui slide-in depuis le haut.
+// Navigation à deux modes :
+// - Desktop (md+) : sidebar fixe à gauche, w-16 par défaut → w-52 au hover.
+//   Les emojis restent en place, le label "se déroule" vers la droite.
+// - Mobile : pill flottante en bas, emojis seuls.
+// Pas de logo "RA" — la sidebar parle d'elle-même.
+
 export function Navigation() {
-  const [open, setOpen] = useState(false);
-  const { scrollY } = useScroll();
-
-  // Au-delà de 40px de scroll : opacité de fond max, bordure visible.
-  const blurOpacity = useTransform(scrollY, [0, 80], [0.4, 0.8]);
-  const borderOpacity = useTransform(scrollY, [0, 80], [0, 1]);
-
-  // Ferme le menu mobile sur resize → desktop pour éviter un état zombie.
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 768) setOpen(false);
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Empêche le scroll sous le menu mobile ouvert.
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   return (
     <>
-      <motion.header
-        className="fixed inset-x-0 top-0 z-50"
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {/* Couche de fond glassmorphique animée */}
-        <motion.div
-          aria-hidden
-          className="absolute inset-0 bg-(--background) backdrop-blur-xl"
-          style={{ opacity: blurOpacity }}
-        />
-        <motion.div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-px bg-(--border)"
-          style={{ opacity: borderOpacity }}
-        />
-
-        <nav className="relative mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link
-            href="/"
-            className="group relative flex items-center gap-2 font-mono text-sm font-semibold tracking-tight"
-            aria-label={`${site.name} — accueil`}
-          >
-            <span
-              aria-hidden
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-(--foreground) text-(--background) text-xs font-bold transition-transform group-hover:scale-105"
-            >
-              {site.initials}
-            </span>
-            <span className="hidden text-(--foreground) sm:inline">
-              {site.name}
-            </span>
-          </Link>
-
-          {/* Liens desktop */}
-          <ul className="hidden items-center gap-1 md:flex">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-sm",
-                    "text-(--muted-foreground) transition-colors",
-                    "hover:bg-(--foreground)/[0.04] hover:text-(--foreground)",
-                    "dark:hover:bg-white/[0.04]",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {/* Burger mobile */}
-            <Button
-              variant="icon"
-              size="icon"
-              className="md:hidden"
-              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-              aria-expanded={open}
-              onClick={() => setOpen((v) => !v)}
-            >
-              {open ? <X className="size-[18px]" /> : <Menu className="size-[18px]" />}
-            </Button>
-          </div>
-        </nav>
-      </motion.header>
-
-      {/* Panneau mobile */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="mobile-menu"
-            className="fixed inset-0 z-40 bg-(--background)/95 backdrop-blur-2xl md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex h-full flex-col items-start justify-center gap-6 px-8 pt-16">
-              {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.05, duration: 0.3 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="text-4xl font-semibold tracking-tight text-(--foreground) hover:text-gradient transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <DesktopSidebar />
+      <MobileBottomBar />
     </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Desktop : sidebar fixe à gauche
+// -----------------------------------------------------------------------------
+function DesktopSidebar() {
+  // L'expansion se fait sur hover (group hover) — purement CSS, pas d'état.
+  // Z-50 pour passer par-dessus toutes les sections sans pousser le contenu.
+  return (
+    <motion.aside
+      initial={{ x: -64, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "group fixed inset-y-0 left-0 z-50 hidden md:flex",
+        "w-16 hover:w-52 flex-col justify-between py-6",
+        "border-r border-(--border) bg-(--background)/70 backdrop-blur-2xl",
+        "transition-[width] duration-300 ease-out",
+      )}
+      aria-label="Navigation principale"
+    >
+      <div className="flex flex-col gap-1 px-3">
+        {navLinks.map((link) => (
+          <SidebarLink key={link.href} {...link} />
+        ))}
+      </div>
+
+      {/* Bas : theme toggle + indicator */}
+      <div className="flex flex-col items-center gap-3 px-3">
+        <ThemeToggle />
+        <div
+          aria-hidden
+          className="h-8 w-px bg-(--border-strong) opacity-60"
+        />
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-(--muted-foreground) opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          v 1.0
+        </span>
+      </div>
+    </motion.aside>
+  );
+}
+
+interface SidebarLinkProps {
+  href: string;
+  label: string;
+  emoji: string;
+}
+
+function SidebarLink({ href, label, emoji }: SidebarLinkProps) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "relative flex items-center gap-3 rounded-lg px-2.5 py-3",
+        "text-sm font-medium text-(--muted-foreground)",
+        "transition-colors hover:bg-(--foreground)/[0.05] hover:text-(--foreground)",
+        "dark:hover:bg-white/[0.05]",
+      )}
+    >
+      {/* Emoji fixé à gauche */}
+      <span
+        aria-hidden
+        className="flex size-6 shrink-0 items-center justify-center text-lg leading-none"
+      >
+        {emoji}
+      </span>
+      {/* Label révélé en fade + translate quand la sidebar s'élargit */}
+      <span
+        className={cn(
+          "whitespace-nowrap opacity-0 -translate-x-2",
+          "transition-[opacity,transform] duration-300 ease-out",
+          "group-hover:opacity-100 group-hover:translate-x-0",
+        )}
+      >
+        {label}
+      </span>
+    </Link>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Mobile : pill flottante en bas
+// -----------------------------------------------------------------------------
+function MobileBottomBar() {
+  // On bloque le scroll horizontal si l'utilisateur clique sur un lien et que
+  // la pill devrait disparaître pendant la transition. Pas de logique d'état
+  // ici — simple anchor scroll.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  return (
+    <motion.nav
+      aria-label="Navigation principale"
+      initial={{ y: 80, opacity: 0 }}
+      animate={{ y: mounted ? 0 : 80, opacity: mounted ? 1 : 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+      className={cn(
+        "fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 md:hidden",
+        "rounded-full border border-(--border) bg-(--background)/85 px-2 py-2 shadow-2xl backdrop-blur-2xl",
+      )}
+    >
+      {navLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          aria-label={link.label}
+          className={cn(
+            "flex size-10 items-center justify-center rounded-full text-lg leading-none",
+            "transition-colors hover:bg-(--foreground)/[0.06]",
+            "dark:hover:bg-white/[0.08]",
+          )}
+        >
+          <span aria-hidden>{link.emoji}</span>
+        </Link>
+      ))}
+      <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
+      <ThemeToggle />
+    </motion.nav>
   );
 }

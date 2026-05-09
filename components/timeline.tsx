@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 export function Timeline() {
   return (
-    <section id="journey" className="relative py-24 md:py-32">
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6">
+    <section id="journey" className="relative py-20 md:py-24">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="04"
           eyebrow="Journey"
@@ -19,7 +19,7 @@ export function Timeline() {
           description="Une trajectoire qui prend forme — et un cap clair pour la suite."
         />
 
-        <div className="relative pl-8 sm:pl-12">
+        <div className="relative mx-auto w-full max-w-4xl pl-8 sm:pl-12">
           {/* Ligne verticale avec gradient → fade en bas */}
           <div
             aria-hidden
@@ -30,7 +30,7 @@ export function Timeline() {
             }}
           />
 
-          <ol className="flex flex-col gap-10 sm:gap-12">
+          <ol className="flex flex-col gap-8 sm:gap-10">
             {timeline.map((step, i) => (
               <Reveal key={step.title} delay={i * 0.05}>
                 <li className="relative">

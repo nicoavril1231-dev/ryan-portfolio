@@ -8,19 +8,20 @@
    Design tokens
    ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
+  --background: #fafaf7;
   --foreground: #0a0a0a;
-  --muted: #f4f4f5;
+  --muted: #f3f1ec;
   --muted-foreground: #52525b;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border: rgba(15, 10, 5, 0.08);
+  --border-strong: rgba(15, 10, 5, 0.14);
   --card: #ffffff;
   --card-foreground: #0a0a0a;
   --primary: #0a0a0a;
   --primary-foreground: #fafafa;
-  --accent-from: #8b5cf6;
-  --accent-to: #3b82f6;
-  --ring: rgba(139, 92, 246, 0.4);
+  /* Light mode → orange Claude (coral chaud → orange brûlé) */
+  --accent-from: #d97757;
+  --accent-to: #b5491d;
+  --ring: rgba(217, 119, 87, 0.45);
 
   --radius: 0.75rem;
 }

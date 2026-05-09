@@ -23,10 +23,11 @@ export const site = {
 
 export type SiteConfig = typeof site;
 
-// Sections ancrées dans la nav.
+// Sections ancrées dans la nav (sidebar émoji-reveal).
 export const navLinks = [
-  { href: "#work", label: "Work" },
-  { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#contact", label: "Contact" },
+  { href: "#work", label: "Work", emoji: "🛠️" },
+  { href: "#about", label: "About", emoji: "👋" },
+  { href: "#skills", label: "Skills", emoji: "⚡" },
+  { href: "#journey", label: "Journey", emoji: "🗺️" },
+  { href: "#contact", label: "Contact", emoji: "✉️" },
 ] as const;

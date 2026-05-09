@@ -22,8 +22,8 @@ import { cn } from "@/lib/utils";
 
 export function Projects() {
   return (
-    <section id="work" className="relative py-24 md:py-32">
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6">
+    <section id="work" className="relative py-20 md:py-24">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="03"
           eyebrow="Selected work"
@@ -31,7 +31,7 @@ export function Projects() {
           description="Un mix de side-projects, projets universitaires et missions freelance. Le code est sur GitHub, dispo en demo quand c'est possible."
         />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project, i) => (
             <Reveal
               key={project.slug}

@@ -78,7 +78,7 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="relative py-24 md:py-32">
+    <section id="contact" className="relative py-20 md:py-24">
       {/* Halo de fond */}
       <div
         aria-hidden
@@ -89,7 +89,7 @@ export function Contact() {
         }}
       />
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="05"
           eyebrow="Get in touch"

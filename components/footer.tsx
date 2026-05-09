@@ -14,7 +14,7 @@ const socials = [
 export function Footer() {
   return (
     <footer className="relative border-t border-(--border) py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
         <p className="text-center text-xs text-(--muted-foreground) sm:text-left">
           © {new Date().getFullYear()} {site.name} — Built with Next.js & ☕ from Nice.
         </p>
