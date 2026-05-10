@@ -14,26 +14,37 @@ import { Button } from "@/components/ui/button";
 // Fallback transparent : si l'API n'existe pas (Firefox actuel) ou si le
 // user a `prefers-reduced-motion: reduce`, on appelle juste setTheme().
 type ViewTransition = { ready: Promise<void> };
-type StartViewTransition = (callback: () => void) => ViewTransition;
+type DocumentWithVT = Document & {
+  startViewTransition?: (callback: () => void) => ViewTransition;
+};
 
 function transitionTheme(
   applyTheme: () => void,
   origin: { x: number; y: number },
 ) {
-  const startVT = (
-    document as Document & { startViewTransition?: StartViewTransition }
-  ).startViewTransition;
-
+  const doc = document as DocumentWithVT;
   const reducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (!startVT || reducedMotion) {
+  // Pas d'API ou user qui préfère pas d'animations → bascule directe.
+  if (!doc.startViewTransition || reducedMotion) {
     applyTheme();
     return;
   }
 
-  const transition = startVT(applyTheme);
+  // Important : on appelle TOUJOURS la méthode via `doc.startViewTransition`,
+  // jamais en l'extrayant dans une variable, sinon `this` est perdu et le
+  // browser throw silencieusement (Illegal invocation).
+  let transition: ViewTransition;
+  try {
+    transition = doc.startViewTransition(applyTheme);
+  } catch {
+    // Si l'API échoue pour une raison X, on s'assure quand même de
+    // basculer le thème — pas de "rien ne se passe".
+    applyTheme();
+    return;
+  }
 
   const { x, y } = origin;
   // Rayon = distance du clic au coin le plus éloigné — garantit que le
@@ -43,21 +54,26 @@ function transitionTheme(
     Math.max(y, window.innerHeight - y),
   );
 
-  void transition.ready.then(() => {
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${endRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 550,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        pseudoElement: "::view-transition-new(root)",
-      },
-    );
-  });
+  transition.ready
+    .then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 550,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    })
+    .catch(() => {
+      // Animation décorative — si elle plante, le thème est déjà basculé,
+      // on ignore.
+    });
 }
 
 export function ThemeToggle() {
