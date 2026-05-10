@@ -5,16 +5,21 @@ import { SegmentedToggle } from "@/components/segmented-toggle";
 
 interface Props {
   orientation?: "horizontal" | "vertical";
+  /** Identifiant unique de l'instance (sidebar / mobile). Cf. ThemeToggle. */
+  instanceId?: string;
 }
 
 // Toggle FR / EN sous forme de segmented control. La "bulle" indique la
 // locale active. Cliquer sur l'autre langue swap le dictionnaire.
-export function LocaleToggle({ orientation = "horizontal" }: Props) {
+export function LocaleToggle({
+  orientation = "horizontal",
+  instanceId = "default",
+}: Props) {
   const { locale, dict, setLocale } = useLocaleContext();
 
   return (
     <SegmentedToggle
-      layoutId={`locale-bubble-${orientation}`}
+      layoutId={`locale-bubble-${instanceId}`}
       orientation={orientation}
       ariaLabel={dict.localeToggle.label}
       active={locale}

@@ -10,12 +10,19 @@ import { transitionTheme } from "@/lib/theme-transition";
 
 interface Props {
   orientation?: "horizontal" | "vertical";
+  /** Identifiant unique de l'instance (sidebar / mobile). Sert au
+   *  `layoutId` de la bulle pour qu'elle reste stable même quand
+   *  l'orientation change. */
+  instanceId?: string;
 }
 
 // Toggle Light / Dark sous forme de segmented control. La "bulle" indique
 // le thème actif. Cliquer sur le thème inactif déclenche en plus la
 // View Transition circulaire (cf. lib/theme-transition.ts).
-export function ThemeToggle({ orientation = "horizontal" }: Props) {
+export function ThemeToggle({
+  orientation = "horizontal",
+  instanceId = "default",
+}: Props) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const dict = useDictionary();
   const [mounted, setMounted] = useState(false);
@@ -42,11 +49,11 @@ export function ThemeToggle({ orientation = "horizontal" }: Props) {
 
   return (
     <SegmentedToggle
-      // Le layoutId est suffixé par l'orientation pour que la version
-      // sidebar et la version mobile-pill (les deux montées dans le DOM)
-      // ne partagent pas la même clé — sinon motion essaierait de animer
-      // entre les deux instances.
-      layoutId={`theme-bubble-${orientation}`}
+      // Le layoutId est dérivé de `instanceId` (sidebar / mobile) PAS de
+      // l'orientation. Comme ça la bulle garde le même id quand la
+      // sidebar passe de vertical à horizontal au hover → motion anime
+      // le déplacement au lieu de la démonter/remonter.
+      layoutId={`theme-bubble-${instanceId}`}
       orientation={orientation}
       ariaLabel="Theme"
       active={current}

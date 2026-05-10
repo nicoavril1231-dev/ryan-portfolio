@@ -74,10 +74,19 @@ function DesktopSidebar({
       </div>
 
       {/* Bas : segmented toggles. Verticaux quand sidebar repliée, ils
-          rotent en horizontal au hover (motion layout). */}
+          rotent en horizontal au hover (motion layout).
+          `instanceId="sidebar"` garde le layoutId de la bulle stable
+          quand l'orientation change → animation de slide au lieu d'un
+          unmount/remount. */}
       <div className="flex flex-col items-center gap-3 px-3">
-        <ThemeToggle orientation={hovered ? "horizontal" : "vertical"} />
-        <LocaleToggle orientation={hovered ? "horizontal" : "vertical"} />
+        <ThemeToggle
+          instanceId="sidebar"
+          orientation={hovered ? "horizontal" : "vertical"}
+        />
+        <LocaleToggle
+          instanceId="sidebar"
+          orientation={hovered ? "horizontal" : "vertical"}
+        />
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-(--muted-foreground) opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           v 1.0
         </span>
@@ -106,39 +115,44 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
         href={href}
         aria-current={active ? "true" : undefined}
         className={cn(
-          "relative flex h-10 items-center rounded-lg text-sm font-medium",
-          // Square 40×40 quand replié → full width quand sidebar étendue.
+          // `overflow-hidden` clip le label hors champ quand la sidebar
+          // est repliée — le label garde ses dimensions naturelles, on
+          // utilise juste la largeur du link pour révéler/cacher.
+          "relative flex h-10 items-center overflow-hidden rounded-lg text-sm font-medium",
+          // Seule la largeur du link change : 40 px (carré) → 100 % de la
+          // sidebar étendue. Aucun changement de `justify-content`, ni de
+          // padding/gap → pas de propriété discrète qui snap au repli.
           "w-10 group-hover:w-full",
-          // Layout flex : icône centrée quand replié, icône+label à gauche
-          // quand étendue (avec padding et gap qui apparaissent).
-          "justify-center group-hover:justify-start",
-          "px-0 group-hover:px-2.5",
-          "gap-0 group-hover:gap-3",
-          // Toutes ces propriétés transitionnent en parallèle pour un
-          // changement d'état fluide.
-          "transition-[width,padding,gap,background-color,color] duration-300 ease-out",
+          "transition-[width,background-color,color] duration-300 ease-out",
           active
             ? "bg-(--foreground)/[0.06] text-(--foreground) dark:bg-white/[0.06]"
             : "text-(--muted-foreground) hover:bg-(--foreground)/[0.05] hover:text-(--foreground) dark:hover:bg-white/[0.05]",
         )}
       >
+        {/* Icône dans un slot fixe `size-10` (40×40) en flex-start.
+            - Quand le link est w-10 → le slot remplit tout le link →
+              l'icône y est centrée (visuellement centrée dans le link).
+            - Quand le link est w-full → le slot garde 40 px à gauche,
+              le reste sert au label. L'icône reste à la gauche du link
+              entier. */}
         <span
           aria-hidden
           className={cn(
-            "flex size-6 shrink-0 items-center justify-center transition-colors",
+            "flex size-10 shrink-0 items-center justify-center transition-colors",
             active && "text-(--accent-from)",
           )}
         >
           <Icon />
         </span>
-        {/* Label : largeur 0 quand replié (overflow-hidden cache le texte),
-            grandit jusqu'à sa taille naturelle quand étendu. */}
+        {/* Label : commence juste après le slot icône. Largeur naturelle ;
+            quand le link est w-10, il dépasse à droite et est clippé par
+            l'overflow-hidden. Fade + slide à l'apparition. */}
         <span
           className={cn(
-            "overflow-hidden whitespace-nowrap",
-            "max-w-0 opacity-0",
-            "transition-[max-width,opacity] duration-300 ease-out",
-            "group-hover:max-w-[160px] group-hover:opacity-100",
+            "whitespace-nowrap pr-3",
+            "opacity-0 -translate-x-1",
+            "transition-[opacity,transform] duration-300 ease-out",
+            "group-hover:opacity-100 group-hover:translate-x-0",
           )}
         >
           {label}
@@ -185,8 +199,8 @@ function MobileBottomBar({
         />
       ))}
       <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
-      <ThemeToggle orientation="horizontal" />
-      <LocaleToggle orientation="horizontal" />
+      <ThemeToggle instanceId="mobile" orientation="horizontal" />
+      <LocaleToggle instanceId="mobile" orientation="horizontal" />
     </motion.nav>
   );
 }
