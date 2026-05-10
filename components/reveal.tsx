@@ -1,74 +1,37 @@
 "use client";
 
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
-import { useRef, type ReactNode } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { type ReactNode } from "react";
 
-// Wrapper "scroll-linked" : opacity, translate-y et blur sont interpolés
-// directement sur la position de l'élément dans le viewport.
+// Wrapper d'apparition — déclenchement par Intersection Observer (whileInView)
+// puis animation à durée fixe d'environ 1 s. Indépendant de la vitesse de
+// scroll : même sur un flick rapide, l'animation a le temps de se dérouler
+// pleinement après l'entrée de l'élément dans le viewport.
 //
-// Fenêtre d'apparition (assez longue pour rester visible même sur scroll
-// rapide, mais avec une fin précoce) :
-// - 0 : top de l'élément à 95 % du viewport (commence à apparaître).
-// - 1 : top de l'élément à 50 % (encore dans la moitié basse du viewport).
-//
-// Le `delay` (0 → 0.4) staggere dans la fenêtre : pour des éléments à
-// la même position Y (cards en rangée), on décale le début de chacun
-// pour qu'ils cascadent au lieu d'apparaître ensemble.
-//
-// Le `useSpring` sur scrollYProgress ajoute une inertie : sur un scroll
-// rapide à la molette ou au trackpad, l'animation a le temps de se
-// jouer au lieu de se claquer en quelques frames.
+// Le stagger se fait via `delay` en secondes (transition delay natif), donc
+// les cards d'une même rangée cascadent visiblement.
 //
 // Respecte `prefers-reduced-motion`.
 interface RevealProps {
   children: ReactNode;
   className?: string;
-  /** Distance verticale initiale en px (l'élément glisse depuis y vers 0). */
+  /** Distance verticale initiale en px. */
   y?: number;
-  /** Stagger offset (0 → 0.4). Décale le début de l'animation. */
+  /** Délai en secondes avant le début de l'animation (utile pour stagger). */
   delay?: number;
-  /**
-   * @deprecated — l'animation scroll-linked est réversible par nature.
-   */
+  /** Si true (défaut), l'animation ne joue qu'une fois (puis l'élément
+   *  reste à son état final). */
   once?: boolean;
 }
 
 export function Reveal({
   children,
   className,
-  y = 50,
+  y = 60,
   delay = 0,
+  once = true,
 }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start 95%", "start 50%"],
-  });
-
-  // Inertie : même sur un flick rapide, scrollYProgress arrive lissé.
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 80,
-    damping: 28,
-    mass: 0.4,
-  });
-
-  // Clamp pour éviter qu'un delay trop grand sorte de la fenêtre.
-  const start = Math.max(0, Math.min(delay, 0.4));
-  const end = Math.min(start + 0.6, 1);
-  const blurEnd = Math.min(start + 0.4, 1);
-
-  const opacity = useTransform(smoothProgress, [start, end], [0, 1]);
-  const translate = useTransform(smoothProgress, [start, end], [y, 0]);
-  const blurValue = useTransform(smoothProgress, [start, blurEnd], [6, 0]);
-  const filter = useTransform(blurValue, (v) => `blur(${v}px)`);
 
   if (prefersReducedMotion) {
     return <div className={className}>{children}</div>;
@@ -76,9 +39,26 @@ export function Reveal({
 
   return (
     <motion.div
-      ref={ref}
       className={className}
-      style={{ opacity, y: translate, filter }}
+      initial={{ opacity: 0, y, filter: "blur(8px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{
+        once,
+        // Déclenche quand 15 % de l'élément est visible — c'est-à-dire dès
+        // que sa partie haute apparaît clairement par le bas du viewport.
+        amount: 0.15,
+        // Le coin bas du viewport est rabaissé de 8 % pour que l'élément
+        // soit déjà bien visible avant de déclencher.
+        margin: "0px 0px -8% 0px",
+      }}
+      transition={{
+        // Durée volontairement longue pour qu'on perçoive le mouvement même
+        // si on scrolle vite. Easing expo-out — démarre vif, finit en
+        // douceur, parfait pour un "glissement vers sa place".
+        duration: 1,
+        ease: [0.16, 1, 0.3, 1] as const,
+        delay,
+      }}
     >
       {children}
     </motion.div>
