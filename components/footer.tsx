@@ -2,6 +2,7 @@ import Link from "next/link";
 import { siGithub, siX } from "simple-icons";
 
 import { BrandIcon } from "@/components/brand-icon";
+import { Reveal } from "@/components/reveal";
 import { linkedinIcon } from "@/lib/brand-paths";
 import { site } from "@/lib/site";
 
@@ -14,7 +15,7 @@ const socials = [
 export function Footer() {
   return (
     <footer className="relative border-t border-(--border) py-10">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
+      <Reveal className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
         <p className="text-center text-xs text-(--muted-foreground) sm:text-left">
           © {new Date().getFullYear()} {site.name} — Built with Next.js & ☕ from Nice.
         </p>
@@ -34,7 +35,7 @@ export function Footer() {
             </li>
           ))}
         </ul>
-      </div>
+      </Reveal>
     </footer>
   );
 }

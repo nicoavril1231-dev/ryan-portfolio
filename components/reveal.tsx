@@ -11,50 +11,55 @@ import { useRef, type ReactNode } from "react";
 // Wrapper "scroll-linked" : opacity, translate-y et blur sont interpolés
 // directement sur la position de l'élément dans le viewport.
 //
-// - Démarre à 0 quand le haut de l'élément touche le bas du viewport
-//   ("start end" → scrollYProgress = 0).
-// - Atteint 1 quand le centre de l'élément est à mi-hauteur du viewport
-//   ("center center" → scrollYProgress = 1).
-// - Réversible : remonter la page rejoue l'effet à l'envers.
+// Fenêtre d'apparition (raccourcie pour finir tôt) :
+// - 0 : top de l'élément à 90 % de la hauteur du viewport (l'élément
+//   commence à peine à apparaître par le bas).
+// - 1 : top de l'élément à 60 % (l'élément est largement visible mais
+//   pas encore centré → l'animation est terminée AVANT sa position
+//   finale, comme demandé).
 //
-// Respecte `prefers-reduced-motion` (rendu plat sans anim).
+// Le `delay` (0 → 0.4) sert maintenant à staggerer dans la fenêtre :
+// pour des éléments à la même position Y (cards en rangée), on décale le
+// début de chacun pour qu'ils cascadent au lieu d'apparaître ensemble.
+//
+// Respecte `prefers-reduced-motion`.
 interface RevealProps {
   children: ReactNode;
   className?: string;
   /** Distance verticale initiale en px (l'élément glisse depuis y vers 0). */
   y?: number;
-  /**
-   * @deprecated — l'API est désormais scroll-linked. Le delay ne s'applique
-   * plus. Conservé en signature pour ne pas casser les usages existants.
-   */
+  /** Stagger offset (0 → 0.4). Décale le début de l'animation. */
   delay?: number;
   /**
-   * @deprecated — l'animation scroll-linked est par nature réversible.
-   * Conservé pour compat.
+   * @deprecated — l'animation scroll-linked est réversible par nature.
    */
   once?: boolean;
 }
 
-export function Reveal({ children, className, y = 60 }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  y = 50,
+  delay = 0,
+}: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Mappe le scroll de l'élément vers 0 → 1 sur sa fenêtre d'apparition.
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "center center"],
+    offset: ["start 90%", "start 60%"],
   });
 
-  // Interpolations dérivées — clamp par défaut : au-delà de 1 ça reste à 1.
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const translate = useTransform(scrollYProgress, [0, 1], [y, 0]);
-  // Blur passe rapidement à 0 (les 70 % du chemin) pour que la "résolution"
-  // de l'élément se fasse plus tôt que son arrivée à sa position finale.
-  const blurValue = useTransform(scrollYProgress, [0, 0.7, 1], [8, 1, 0]);
+  // Clamp pour éviter qu'un delay trop grand sorte de la fenêtre.
+  const start = Math.max(0, Math.min(delay, 0.4));
+  const end = Math.min(start + 0.5, 1);
+  const blurEnd = Math.min(start + 0.35, 1);
+
+  const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
+  const translate = useTransform(scrollYProgress, [start, end], [y, 0]);
+  const blurValue = useTransform(scrollYProgress, [start, blurEnd], [6, 0]);
   const filter = useTransform(blurValue, (v) => `blur(${v}px)`);
 
-  // useReducedMotion() retourne null avant hydratation, true/false après.
-  // On ne court-circuite que si on est sûr que l'utilisateur préfère rien.
   if (prefersReducedMotion) {
     return <div className={className}>{children}</div>;
   }

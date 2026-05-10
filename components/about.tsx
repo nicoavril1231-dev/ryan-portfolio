@@ -98,8 +98,10 @@ export function About() {
 
           {/* Bio + stats */}
           <div className="flex flex-col gap-6">
-            <Reveal delay={0.1}>
-              <div className="space-y-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg">
+            {/* Chaque paragraphe a son propre Reveal pour cascader
+                naturellement au scroll (positions Y différentes). */}
+            <div className="flex flex-col gap-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg">
+              <Reveal>
                 <p>
                   Je suis en{" "}
                   <span className="text-(--foreground)">
@@ -109,6 +111,8 @@ export function About() {
                   problèmes concrets et d’en sortir des produits utilisables —
                   pas des prototypes qui crashent au premier clic.
                 </p>
+              </Reveal>
+              <Reveal>
                 <p>
                   En parallèle des cours, je passe énormément de temps à
                   bricoler des side-projects : un bot Discord pour modérer les
@@ -117,6 +121,8 @@ export function About() {
                   c’est l’occasion d’apprendre une stack ou un pattern que je
                   ne maîtrisais pas.
                 </p>
+              </Reveal>
+              <Reveal>
                 <p>
                   Je cherche maintenant{" "}
                   <span className="text-(--foreground)">
@@ -125,16 +131,15 @@ export function About() {
                   où je pourrai contribuer à un produit qui a du caractère, aux
                   côtés d’une équipe qui prend le craft au sérieux.
                 </p>
-              </div>
-            </Reveal>
+              </Reveal>
+            </div>
 
-            <Reveal delay={0.2}>
-              <div className="grid grid-cols-3 gap-3">
-                {stats.map((stat) => (
-                  <Card
-                    key={stat.label}
-                    className="flex flex-col gap-2 p-4 transition-colors hover:border-(--border-strong) sm:p-5"
-                  >
+            {/* Chaque stat dans son propre Reveal avec stagger : les 3
+                cards sont en rangée (même Y) → le delay décale leur début. */}
+            <div className="grid grid-cols-3 gap-3">
+              {stats.map((stat, i) => (
+                <Reveal key={stat.label} delay={i * 0.07}>
+                  <Card className="flex flex-col gap-2 p-4 transition-colors hover:border-(--border-strong) sm:p-5">
                     <stat.icon className="size-4 text-(--muted-foreground)" />
                     <div className="text-2xl font-semibold tracking-tight text-(--foreground) sm:text-3xl">
                       {stat.value}
@@ -143,9 +148,9 @@ export function About() {
                       {stat.label}
                     </div>
                   </Card>
-                ))}
-              </div>
-            </Reveal>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </div>
