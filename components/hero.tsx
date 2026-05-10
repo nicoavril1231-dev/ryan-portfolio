@@ -41,7 +41,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative isolate flex min-h-[92svh] w-full items-center overflow-hidden"
+      className="relative isolate flex min-h-[100svh] w-full items-center overflow-hidden"
     >
       {/* Couches d'arrière-plan, du plus profond au plus surfacique */}
       <Orbs />
@@ -140,12 +140,13 @@ export function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Indicateur de scroll */}
+      {/* Indicateur de scroll — collé tout en bas du Hero, qui est lui
+          même un viewport entier (100svh). */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 sm:block"
+        className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 sm:block"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

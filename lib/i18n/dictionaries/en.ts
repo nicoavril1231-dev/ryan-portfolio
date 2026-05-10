@@ -11,6 +11,7 @@ export const en: Dictionary = {
       "Computer Science student in Nice (France), I turn ideas into fast and polished web interfaces.",
   },
   nav: {
+    home: "Home",
     work: "Work",
     about: "About",
     skills: "Skills",

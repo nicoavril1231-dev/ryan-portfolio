@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Compass, Hand, Send, Zap } from "lucide-react";
+import { Briefcase, Compass, Hand, House, Send, Zap } from "lucide-react";
 import { motion, type Variants } from "motion/react";
 
 // Icônes animées de la sidebar.
@@ -64,12 +64,32 @@ const sendVariants: Variants = {
   },
 };
 
+const houseVariants: Variants = {
+  rest: { scale: 1, y: 0 },
+  // Petit "bump" + lift discret — la maison "rebondit" pour signaler
+  // qu'on rentre chez soi.
+  hover: {
+    scale: [1, 1.12, 1],
+    y: [0, -1.5, 0],
+    transition: { duration: 0.45, ease: "easeOut" as const },
+  },
+};
+
 // On enveloppe Lucide dans un motion.span pour appliquer les variants au
 // niveau parent. strokeWidth 1.75 pour cohérence visuelle entre les 5.
 const iconClass = "size-5";
 const iconStroke = 1.75;
 
 export const NAV_ICONS = {
+  home: () => (
+    <motion.span
+      variants={houseVariants}
+      className="inline-flex"
+      style={{ willChange: "transform" }}
+    >
+      <House className={iconClass} strokeWidth={iconStroke} />
+    </motion.span>
+  ),
   work: () => (
     <motion.span
       variants={briefcaseVariants}
