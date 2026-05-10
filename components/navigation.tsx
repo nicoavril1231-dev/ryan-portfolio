@@ -59,9 +59,11 @@ function DesktopSidebar({
       )}
       aria-label="Navigation"
     >
-      {/* `items-center` permet aux <Link> de garder leur largeur explicite
-          (w-10 → w-full) au lieu d'être stretched par défaut. */}
-      <div className="flex flex-col items-center gap-1 px-3">
+      {/* Pas de `items-center` : on veut que les Link soient stretchés à
+          la largeur du contenu de la sidebar (qui change avec son hover).
+          Comme ça leur largeur reste toujours synchronisée et il n'y a
+          jamais de mismatch qui pousse les items à gauche. */}
+      <div className="flex flex-col gap-1 px-3">
         {navLinks.map((link) => (
           <SidebarLink
             key={link.href}
@@ -116,14 +118,14 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
         aria-current={active ? "true" : undefined}
         className={cn(
           // `overflow-hidden` clip le label hors champ quand la sidebar
-          // est repliée — le label garde ses dimensions naturelles, on
-          // utilise juste la largeur du link pour révéler/cacher.
+          // est repliée — le label garde ses dimensions naturelles.
           "relative flex h-10 items-center overflow-hidden rounded-lg text-sm font-medium",
-          // Seule la largeur du link change : 40 px (carré) → 100 % de la
-          // sidebar étendue. Aucun changement de `justify-content`, ni de
-          // padding/gap → pas de propriété discrète qui snap au repli.
-          "w-10 group-hover:w-full",
-          "transition-[width,background-color,color] duration-300 ease-out",
+          // `w-full` toujours : le link suit pile la largeur de la
+          // sidebar (40 px replié → 100 % étendu). Plus de transition
+          // sur sa propre width → impossible d'être désynchronisé avec
+          // le parent qui s'anime, donc plus de "rentre par la gauche".
+          "w-full",
+          "transition-[background-color,color] duration-300 ease-out",
           active
             ? "bg-(--foreground)/[0.06] text-(--foreground) dark:bg-white/[0.06]"
             : "text-(--muted-foreground) hover:bg-(--foreground)/[0.05] hover:text-(--foreground) dark:hover:bg-white/[0.05]",

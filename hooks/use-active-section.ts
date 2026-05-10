@@ -2,39 +2,57 @@
 
 import { useEffect, useState } from "react";
 
-// Track la section "actuellement lue" via IntersectionObserver.
-// La détection se fait sur une bande horizontale au milieu du viewport
-// (35% du haut, 40% du bas → 25% au centre) pour que ce soit la section
-// dans laquelle l'œil est posé qui soit considérée active, pas celle qui
-// vient juste de pointer en bas.
+// Détecte la section "couramment lue" via un simple scroll listener
+// rAF-throttled. On garde la DERNIÈRE section (en ordre du DOM) dont le
+// top est passé au-dessus d'une ligne de référence à 40 % du viewport :
+// c'est la section dans laquelle le visiteur vient d'entrer.
+//
+// Pourquoi pas IntersectionObserver : pour les sections plus hautes que
+// la bande de détection, l'`intersectionRatio` plafonne sous le seuil
+// suivant et l'observer ne tire plus d'événements pendant toute la
+// traversée → l'active "saute" la section. Un scroll listener fait des
+// passes continues, sans angle mort.
 export function useActiveSection(sectionIds: readonly string[]): string | null {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Parmi les sections qui intersectent, on choisit celle qui a la
-        // plus grande surface visible dans la bande de détection.
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+    let frame = 0;
 
-        if (visible.length > 0) {
-          setActiveId(visible[0].target.id);
+    function compute() {
+      const refY = window.innerHeight * 0.4;
+      let candidate: string | null = null;
+
+      // sectionIds est dans l'ordre des sections sur la page. On itère
+      // et on garde la dernière dont le top est <= refY ; les suivantes
+      // (toutes sous la ligne) sortent par `break`.
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= refY) {
+          candidate = id;
+        } else {
+          break;
         }
-      },
-      {
-        rootMargin: "-35% 0px -40% 0px",
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      },
-    );
+      }
 
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+      setActiveId((prev) => (prev === candidate ? prev : candidate));
+    }
 
-    return () => observer.disconnect();
+    function schedule() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(compute);
+    }
+
+    compute();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
   }, [sectionIds]);
 
   return activeId;
