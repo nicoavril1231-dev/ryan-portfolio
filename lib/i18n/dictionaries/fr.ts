@@ -9,10 +9,10 @@ export const fr = {
       "Étudiant en BUT Informatique à Nice, je transforme des idées en interfaces web rapides et soignées.",
   },
   nav: {
-    work: "Work",
-    about: "About",
-    skills: "Skills",
-    journey: "Journey",
+    work: "Projets",
+    about: "À propos",
+    skills: "Compétences",
+    journey: "Parcours",
     contact: "Contact",
   },
   themeToggle: {
