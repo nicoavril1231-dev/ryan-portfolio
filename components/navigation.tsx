@@ -13,15 +13,8 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { navLinks, type NavLinkLabelKey } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-// Navigation à deux modes :
-// - Desktop (md+) : sidebar fixe à gauche, w-16 → w-52 au hover.
-//   Icônes SVG animées, labels qui se déroulent, indicateur de section
-//   active (bg + icône en accent).
-// - Mobile : pill flottante en bas, icônes seules + theme toggle + locale.
-
 export function Navigation() {
   const dict = useDictionary();
-  // useMemo : référence stable pour la liste des sectionIds.
   const sectionIds = useMemo(
     () => navLinks.map((l) => l.href.slice(1)),
     [],
@@ -46,11 +39,18 @@ function DesktopSidebar({
   dict: Dictionary;
   activeSection: string | null;
 }) {
+  // Sync de l'état hover avec mouseEnter/Leave : nécessaire pour que
+  // motion détecte le changement d'orientation des segmented toggles
+  // (les changements pure CSS ne déclenchent pas les layout effects).
+  const [hovered, setHovered] = useState(false);
+
   return (
     <motion.aside
       initial={{ x: -64, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={cn(
         "group fixed inset-y-0 left-0 z-50 hidden md:flex",
         "w-16 hover:w-52 flex-col justify-between py-6",
@@ -59,7 +59,9 @@ function DesktopSidebar({
       )}
       aria-label="Navigation"
     >
-      <div className="flex flex-col gap-1 px-3">
+      {/* `items-center` permet aux <Link> de garder leur largeur explicite
+          (w-10 → w-full) au lieu d'être stretched par défaut. */}
+      <div className="flex flex-col items-center gap-1 px-3">
         {navLinks.map((link) => (
           <SidebarLink
             key={link.href}
@@ -71,11 +73,11 @@ function DesktopSidebar({
         ))}
       </div>
 
-      {/* Bas : segmented toggles (theme + locale) en orientation verticale
-          pour tenir dans la sidebar étroite (32 px de large par capsule). */}
+      {/* Bas : segmented toggles. Verticaux quand sidebar repliée, ils
+          rotent en horizontal au hover (motion layout). */}
       <div className="flex flex-col items-center gap-3 px-3">
-        <ThemeToggle orientation="vertical" />
-        <LocaleToggle orientation="vertical" />
+        <ThemeToggle orientation={hovered ? "horizontal" : "vertical"} />
+        <LocaleToggle orientation={hovered ? "horizontal" : "vertical"} />
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-(--muted-foreground) opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           v 1.0
         </span>
@@ -104,8 +106,17 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
         href={href}
         aria-current={active ? "true" : undefined}
         className={cn(
-          "relative flex items-center gap-3 rounded-lg px-2.5 py-3 text-sm font-medium",
-          "transition-colors",
+          "relative flex h-10 items-center rounded-lg text-sm font-medium",
+          // Square 40×40 quand replié → full width quand sidebar étendue.
+          "w-10 group-hover:w-full",
+          // Layout flex : icône centrée quand replié, icône+label à gauche
+          // quand étendue (avec padding et gap qui apparaissent).
+          "justify-center group-hover:justify-start",
+          "px-0 group-hover:px-2.5",
+          "gap-0 group-hover:gap-3",
+          // Toutes ces propriétés transitionnent en parallèle pour un
+          // changement d'état fluide.
+          "transition-[width,padding,gap,background-color,color] duration-300 ease-out",
           active
             ? "bg-(--foreground)/[0.06] text-(--foreground) dark:bg-white/[0.06]"
             : "text-(--muted-foreground) hover:bg-(--foreground)/[0.05] hover:text-(--foreground) dark:hover:bg-white/[0.05]",
@@ -120,11 +131,14 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
         >
           <Icon />
         </span>
+        {/* Label : largeur 0 quand replié (overflow-hidden cache le texte),
+            grandit jusqu'à sa taille naturelle quand étendu. */}
         <span
           className={cn(
-            "whitespace-nowrap opacity-0 -translate-x-2",
-            "transition-[opacity,transform] duration-300 ease-out",
-            "group-hover:opacity-100 group-hover:translate-x-0",
+            "overflow-hidden whitespace-nowrap",
+            "max-w-0 opacity-0",
+            "transition-[max-width,opacity] duration-300 ease-out",
+            "group-hover:max-w-[160px] group-hover:opacity-100",
           )}
         >
           {label}
@@ -204,5 +218,4 @@ function MobileNavItem({ href, label, iconKey, active }: SidebarLinkProps) {
   );
 }
 
-// Re-export pour cohérence avec l'ancien type usage.
 export type { NavLinkLabelKey };

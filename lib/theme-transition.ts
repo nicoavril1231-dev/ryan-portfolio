@@ -48,8 +48,11 @@ export function transitionTheme(
           ],
         },
         {
-          duration: 550,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          // Plus long et plus moelleux qu'avant : on veut que l'œil ait
+          // le temps d'absorber la bascule. Easing ease-in-out cubic-ish
+          // pour pas démarrer ni finir sec.
+          duration: 900,
+          easing: "cubic-bezier(0.65, 0, 0.35, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );
