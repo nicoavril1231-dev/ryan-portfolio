@@ -1,10 +1,13 @@
 import {
+  siAndroidstudio,
+  siC,
   siCss,
   siDocker,
-  siExpress,
   siFigma,
+  siFirebase,
   siGit,
   siHtml5,
+  siJavascript,
   siLinux,
   siMongodb,
   siMysql,
@@ -19,7 +22,7 @@ import {
 } from "simple-icons";
 
 import type { BrandPath } from "@/components/brand-icon";
-import { vscodeIcon } from "@/lib/brand-paths";
+import { javaIcon, vscodeIcon } from "@/lib/brand-paths";
 
 // Helper minimal pour ne garder que ce dont on a besoin (path, hex, title)
 // et permettre d'overrider le label affiché.
@@ -60,9 +63,13 @@ export const skillCategories: readonly SkillCategory[] = [
     description: "APIs propres, modèles cohérents, perf au rendez-vous.",
     items: [
       tech(siNodedotjs, "Node.js"),
-      tech(siExpress, "Express"),
+      // Java retiré de simple-icons → fallback hardcodé (cf. brand-paths).
+      { ...javaIcon, label: "Java" },
+      tech(siJavascript, "JavaScript"),
       tech(siPython, "Python"),
       tech(siPhp, "PHP"),
+      tech(siC, "C"),
+      tech(siFirebase, "Firebase"),
     ],
   },
   {
@@ -83,8 +90,9 @@ export const skillCategories: readonly SkillCategory[] = [
       tech(siGit, "Git"),
       tech(siDocker, "Docker"),
       tech(siFigma, "Figma"),
-      // VS Code retiré de simple-icons → fallback hardcodé (cf. brand-paths).
+      // VS Code retiré de simple-icons → fallback hardcodé.
       { ...vscodeIcon, label: "VS Code" },
+      tech(siAndroidstudio, "Android Studio"),
       tech(siLinux, "Linux"),
     ],
   },
