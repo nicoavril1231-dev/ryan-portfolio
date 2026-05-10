@@ -9,7 +9,7 @@ export const site = {
   locationFlag: "🇫🇷",
   formation: "BUT Informatique — IUT Nice Côte d'Azur",
   year: "2ᵉ année",
-  email: "ryan.avril@example.com",
+  email: "avril.ryan.pro@gmail.com",
   availability: "Disponible pour une alternance dès septembre 2026",
   description:
     "Étudiant en BUT Informatique à Nice, je transforme des idées en interfaces web rapides et soignées.",

@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import { Navigation } from "@/components/navigation";
 import { Projects } from "@/components/projects";
+import { ScrollProgress } from "@/components/scroll-progress";
 import { Skills } from "@/components/skills";
 import { Timeline } from "@/components/timeline";
 
@@ -16,6 +17,7 @@ import { Timeline } from "@/components/timeline";
 export default function HomePage() {
   return (
     <>
+      <ScrollProgress />
       <Navigation />
       <div className="md:pl-16">
         <main className="relative pb-24 md:pb-0">

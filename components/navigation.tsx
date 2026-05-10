@@ -2,24 +2,34 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { NAV_ICONS, type NavIconKey } from "@/components/nav-icons";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useActiveSection } from "@/hooks/use-active-section";
 import { navLinks } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Navigation à deux modes :
 // - Desktop (md+) : sidebar fixe à gauche, w-16 → w-52 au hover.
 //   Icônes SVG animées (motion variants), labels qui se déroulent.
+//   La section couramment lue est mise en évidence (bg + icône en accent).
 // - Mobile : pill flottante en bas, icônes seules + theme toggle.
 // Pas de logo "RA" — la sidebar parle d'elle-même.
 
 export function Navigation() {
+  // useMemo : garde une référence stable pour la liste des sectionIds afin
+  // que useActiveSection ne recrée pas son observer à chaque render.
+  const sectionIds = useMemo(
+    () => navLinks.map((l) => l.href.slice(1)),
+    [],
+  );
+  const activeSection = useActiveSection(sectionIds);
+
   return (
     <>
-      <DesktopSidebar />
-      <MobileBottomBar />
+      <DesktopSidebar activeSection={activeSection} />
+      <MobileBottomBar activeSection={activeSection} />
     </>
   );
 }
@@ -27,7 +37,7 @@ export function Navigation() {
 // -----------------------------------------------------------------------------
 // Desktop : sidebar fixe à gauche
 // -----------------------------------------------------------------------------
-function DesktopSidebar() {
+function DesktopSidebar({ activeSection }: { activeSection: string | null }) {
   return (
     <motion.aside
       initial={{ x: -64, opacity: 0 }}
@@ -43,7 +53,11 @@ function DesktopSidebar() {
     >
       <div className="flex flex-col gap-1 px-3">
         {navLinks.map((link) => (
-          <SidebarLink key={link.href} {...link} />
+          <SidebarLink
+            key={link.href}
+            {...link}
+            active={activeSection === link.href.slice(1)}
+          />
         ))}
       </div>
 
@@ -66,9 +80,10 @@ interface SidebarLinkProps {
   href: string;
   label: string;
   iconKey: NavIconKey;
+  active?: boolean;
 }
 
-function SidebarLink({ href, label, iconKey }: SidebarLinkProps) {
+function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
   const Icon = NAV_ICONS[iconKey];
   return (
     // Wrapper motion : `whileHover` propage la variante "hover" aux enfants
@@ -81,16 +96,21 @@ function SidebarLink({ href, label, iconKey }: SidebarLinkProps) {
     >
       <Link
         href={href}
+        aria-current={active ? "true" : undefined}
         className={cn(
-          "relative flex items-center gap-3 rounded-lg px-2.5 py-3",
-          "text-sm font-medium text-(--muted-foreground)",
-          "transition-colors hover:bg-(--foreground)/[0.05] hover:text-(--foreground)",
-          "dark:hover:bg-white/[0.05]",
+          "relative flex items-center gap-3 rounded-lg px-2.5 py-3 text-sm font-medium",
+          "transition-colors",
+          active
+            ? "bg-(--foreground)/[0.06] text-(--foreground) dark:bg-white/[0.06]"
+            : "text-(--muted-foreground) hover:bg-(--foreground)/[0.05] hover:text-(--foreground) dark:hover:bg-white/[0.05]",
         )}
       >
         <span
           aria-hidden
-          className="flex size-6 shrink-0 items-center justify-center"
+          className={cn(
+            "flex size-6 shrink-0 items-center justify-center transition-colors",
+            active && "text-(--accent-from)",
+          )}
         >
           <Icon />
         </span>
@@ -112,7 +132,7 @@ function SidebarLink({ href, label, iconKey }: SidebarLinkProps) {
 // -----------------------------------------------------------------------------
 // Mobile : pill flottante en bas
 // -----------------------------------------------------------------------------
-function MobileBottomBar() {
+function MobileBottomBar({ activeSection }: { activeSection: string | null }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -131,7 +151,11 @@ function MobileBottomBar() {
       )}
     >
       {navLinks.map((link) => (
-        <MobileNavItem key={link.href} {...link} />
+        <MobileNavItem
+          key={link.href}
+          {...link}
+          active={activeSection === link.href.slice(1)}
+        />
       ))}
       <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
       <ThemeToggle />
@@ -139,7 +163,7 @@ function MobileBottomBar() {
   );
 }
 
-function MobileNavItem({ href, label, iconKey }: SidebarLinkProps) {
+function MobileNavItem({ href, label, iconKey, active }: SidebarLinkProps) {
   const Icon = NAV_ICONS[iconKey];
   return (
     // whileTap pour donner du feedback au tap mobile (pas de hover sur touch).
@@ -152,10 +176,13 @@ function MobileNavItem({ href, label, iconKey }: SidebarLinkProps) {
       <Link
         href={href}
         aria-label={label}
+        aria-current={active ? "true" : undefined}
         className={cn(
-          "flex size-10 items-center justify-center rounded-full text-(--muted-foreground)",
-          "transition-colors hover:bg-(--foreground)/[0.06] hover:text-(--foreground)",
-          "dark:hover:bg-white/[0.08]",
+          "flex size-10 items-center justify-center rounded-full",
+          "transition-colors",
+          active
+            ? "bg-(--foreground)/[0.06] text-(--accent-from) dark:bg-white/[0.08]"
+            : "text-(--muted-foreground) hover:bg-(--foreground)/[0.06] hover:text-(--foreground) dark:hover:bg-white/[0.08]",
         )}
       >
         <Icon />

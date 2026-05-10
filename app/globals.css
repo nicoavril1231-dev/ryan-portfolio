@@ -131,6 +131,18 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Quand on clique un lien d'ancre (sidebar nav), la section ne colle
+       pas au bord du viewport — on laisse 1 rem de respiration. */
+    scroll-padding-top: 1rem;
+  }
+
+  /* Smooth scroll natif activé seulement si l'utilisateur n'a pas
+     prefers-reduced-motion. Les liens d'ancre #about / #work ... glissent
+     au lieu de sauter brutalement. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   html.dark {

@@ -78,6 +78,9 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
+      // Next.js 16 ne touche plus à scroll-behavior par défaut. On signale
+      // explicitement qu'on veut smooth scroll pendant les transitions.
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-(--background) text-(--foreground) font-sans">

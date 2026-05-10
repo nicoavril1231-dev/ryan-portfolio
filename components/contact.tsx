@@ -59,7 +59,7 @@ export function Contact() {
     await new Promise((r) => setTimeout(r, 600));
     console.info("[contact]", values);
     toast.success("Message envoyé !", {
-      description: "Je reviens vers toi sous 48h, promis.",
+      description: "Je reviens vers toi sous 24h, promis.",
     });
     form.reset();
   };
@@ -215,7 +215,7 @@ export function Contact() {
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 <p className="text-xs text-(--muted-foreground)">
-                  Je réponds sous 48h en moyenne.
+                  Je réponds sous 24h en moyenne.
                 </p>
                 <Button
                   type="submit"

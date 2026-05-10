@@ -21,10 +21,13 @@ export function Timeline() {
         />
 
         <div className="relative mx-auto w-full max-w-4xl pl-8 sm:pl-12">
-          {/* Ligne verticale avec gradient → fade en bas */}
+          {/* Ligne verticale avec gradient → fade en bas.
+              Largeur 2 px et positions 10/18 px → centre 11/19 px,
+              exactement aligné avec le centre des dots `size-2.5` à
+              `-left-[26px]/sm:-left-[34px]` (cf. plus bas). */}
           <div
             aria-hidden
-            className="absolute bottom-0 left-2 top-2 w-px sm:left-4"
+            className="absolute bottom-0 left-2.5 top-2 w-0.5 sm:left-[18px]"
             style={{
               background:
                 "linear-gradient(to bottom, var(--accent-from), var(--accent-to), transparent)",
