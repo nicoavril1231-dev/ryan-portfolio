@@ -32,7 +32,7 @@ export function Skills() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {skillCategories.map((cat, i) => (
-            <Reveal key={cat.id} delay={i * 0.05}>
+            <Reveal key={cat.id} delay={i * 0.08}>
               <Card className="flex h-full flex-col gap-5 p-5 sm:p-6">
                 <div className="flex flex-col gap-1.5">
                   <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">

@@ -32,7 +32,7 @@ export function Timeline() {
 
           <ol className="flex flex-col gap-8 sm:gap-10">
             {timeline.map((step, i) => (
-              <Reveal key={step.title} delay={i * 0.05}>
+              <Reveal key={step.title} delay={i * 0.08}>
                 <li className="relative">
                   {/* Point sur la ligne */}
                   <span

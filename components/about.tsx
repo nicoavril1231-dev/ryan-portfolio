@@ -138,7 +138,7 @@ export function About() {
                 cards sont en rangée (même Y) → le delay décale leur début. */}
             <div className="grid grid-cols-3 gap-3">
               {stats.map((stat, i) => (
-                <Reveal key={stat.label} delay={i * 0.07}>
+                <Reveal key={stat.label} delay={i * 0.1}>
                   <Card className="flex flex-col gap-2 p-4 transition-colors hover:border-(--border-strong) sm:p-5">
                     <stat.icon className="size-4 text-(--muted-foreground)" />
                     <div className="text-2xl font-semibold tracking-tight text-(--foreground) sm:text-3xl">

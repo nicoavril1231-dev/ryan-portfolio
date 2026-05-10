@@ -35,7 +35,7 @@ export function Projects() {
           {projects.map((project, i) => (
             <Reveal
               key={project.slug}
-              delay={i * 0.05}
+              delay={i * 0.08}
               className={cn(project.featured && "md:col-span-2")}
             >
               <ProjectCard project={project} />
