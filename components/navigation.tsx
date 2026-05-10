@@ -4,22 +4,24 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { LocaleToggle } from "@/components/locale-toggle";
+import { useDictionary } from "@/components/locale-provider";
 import { NAV_ICONS, type NavIconKey } from "@/components/nav-icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useActiveSection } from "@/hooks/use-active-section";
-import { navLinks } from "@/lib/site";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { navLinks, type NavLinkLabelKey } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Navigation à deux modes :
 // - Desktop (md+) : sidebar fixe à gauche, w-16 → w-52 au hover.
-//   Icônes SVG animées (motion variants), labels qui se déroulent.
-//   La section couramment lue est mise en évidence (bg + icône en accent).
-// - Mobile : pill flottante en bas, icônes seules + theme toggle.
-// Pas de logo "RA" — la sidebar parle d'elle-même.
+//   Icônes SVG animées, labels qui se déroulent, indicateur de section
+//   active (bg + icône en accent).
+// - Mobile : pill flottante en bas, icônes seules + theme toggle + locale.
 
 export function Navigation() {
-  // useMemo : garde une référence stable pour la liste des sectionIds afin
-  // que useActiveSection ne recrée pas son observer à chaque render.
+  const dict = useDictionary();
+  // useMemo : référence stable pour la liste des sectionIds.
   const sectionIds = useMemo(
     () => navLinks.map((l) => l.href.slice(1)),
     [],
@@ -28,8 +30,8 @@ export function Navigation() {
 
   return (
     <>
-      <DesktopSidebar activeSection={activeSection} />
-      <MobileBottomBar activeSection={activeSection} />
+      <DesktopSidebar dict={dict} activeSection={activeSection} />
+      <MobileBottomBar dict={dict} activeSection={activeSection} />
     </>
   );
 }
@@ -37,7 +39,13 @@ export function Navigation() {
 // -----------------------------------------------------------------------------
 // Desktop : sidebar fixe à gauche
 // -----------------------------------------------------------------------------
-function DesktopSidebar({ activeSection }: { activeSection: string | null }) {
+function DesktopSidebar({
+  dict,
+  activeSection,
+}: {
+  dict: Dictionary;
+  activeSection: string | null;
+}) {
   return (
     <motion.aside
       initial={{ x: -64, opacity: 0 }}
@@ -49,24 +57,27 @@ function DesktopSidebar({ activeSection }: { activeSection: string | null }) {
         "border-r border-(--border) bg-(--background)/70 backdrop-blur-2xl",
         "transition-[width] duration-300 ease-out",
       )}
-      aria-label="Navigation principale"
+      aria-label="Navigation"
     >
       <div className="flex flex-col gap-1 px-3">
         {navLinks.map((link) => (
           <SidebarLink
             key={link.href}
-            {...link}
+            href={link.href}
+            label={dict.nav[link.labelKey]}
+            iconKey={link.iconKey}
             active={activeSection === link.href.slice(1)}
           />
         ))}
       </div>
 
-      {/* Bas : theme toggle + indicator */}
-      <div className="flex flex-col items-center gap-3 px-3">
+      {/* Bas : theme toggle + locale toggle + indicator */}
+      <div className="flex flex-col items-center gap-2 px-3">
         <ThemeToggle />
+        <LocaleToggle />
         <div
           aria-hidden
-          className="h-8 w-px bg-(--border-strong) opacity-60"
+          className="h-6 w-px bg-(--border-strong) opacity-60"
         />
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-(--muted-foreground) opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           v 1.0
@@ -86,8 +97,6 @@ interface SidebarLinkProps {
 function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
   const Icon = NAV_ICONS[iconKey];
   return (
-    // Wrapper motion : `whileHover` propage la variante "hover" aux enfants
-    // motion.* via le variants tree → l'icône joue son anim sans state local.
     <motion.div
       initial="rest"
       animate="rest"
@@ -114,7 +123,6 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
         >
           <Icon />
         </span>
-        {/* Label révélé en fade + translate quand la sidebar s'élargit */}
         <span
           className={cn(
             "whitespace-nowrap opacity-0 -translate-x-2",
@@ -132,7 +140,13 @@ function SidebarLink({ href, label, iconKey, active }: SidebarLinkProps) {
 // -----------------------------------------------------------------------------
 // Mobile : pill flottante en bas
 // -----------------------------------------------------------------------------
-function MobileBottomBar({ activeSection }: { activeSection: string | null }) {
+function MobileBottomBar({
+  dict,
+  activeSection,
+}: {
+  dict: Dictionary;
+  activeSection: string | null;
+}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -141,7 +155,7 @@ function MobileBottomBar({ activeSection }: { activeSection: string | null }) {
 
   return (
     <motion.nav
-      aria-label="Navigation principale"
+      aria-label="Navigation"
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: mounted ? 0 : 80, opacity: mounted ? 1 : 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
@@ -153,12 +167,15 @@ function MobileBottomBar({ activeSection }: { activeSection: string | null }) {
       {navLinks.map((link) => (
         <MobileNavItem
           key={link.href}
-          {...link}
+          href={link.href}
+          label={dict.nav[link.labelKey]}
+          iconKey={link.iconKey}
           active={activeSection === link.href.slice(1)}
         />
       ))}
       <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
       <ThemeToggle />
+      <LocaleToggle compact />
     </motion.nav>
   );
 }
@@ -166,7 +183,6 @@ function MobileBottomBar({ activeSection }: { activeSection: string | null }) {
 function MobileNavItem({ href, label, iconKey, active }: SidebarLinkProps) {
   const Icon = NAV_ICONS[iconKey];
   return (
-    // whileTap pour donner du feedback au tap mobile (pas de hover sur touch).
     <motion.div
       initial="rest"
       animate="rest"
@@ -190,3 +206,6 @@ function MobileNavItem({ href, label, iconKey, active }: SidebarLinkProps) {
     </motion.div>
   );
 }
+
+// Re-export pour cohérence avec l'ancien type usage.
+export type { NavLinkLabelKey };

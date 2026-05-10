@@ -9,6 +9,7 @@ import { Magnetic } from "@/components/fx/magnetic";
 import { Noise } from "@/components/fx/noise";
 import { Orbs } from "@/components/fx/orbs";
 import { Spotlight } from "@/components/fx/spotlight";
+import { useDictionary } from "@/components/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { site } from "@/lib/site";
@@ -34,6 +35,9 @@ const item = {
 };
 
 export function Hero() {
+  const dict = useDictionary();
+  const t = dict.hero;
+
   return (
     <section
       id="top"
@@ -68,7 +72,7 @@ export function Hero() {
               <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            {site.availability}
+            {t.availability}
           </Badge>
         </motion.div>
 
@@ -77,7 +81,7 @@ export function Hero() {
           variants={item}
           className="font-mono text-xs uppercase tracking-[0.25em] text-(--muted-foreground)"
         >
-          {site.role} · {site.location} {site.locationFlag}
+          {t.role} · {t.location} {t.locationFlag}
         </motion.p>
 
         {/* Nom géant — gradient text, line-height resserré */}
@@ -101,14 +105,14 @@ export function Hero() {
           className="flex max-w-2xl flex-col gap-2 text-base text-(--muted-foreground) md:text-lg"
         >
           <p>
-            <span className="text-(--foreground)">{site.year}</span> de BUT
-            Informatique à l’IUT Nice Côte d’Azur.
+            <span className="text-(--foreground)">{t.year}</span> {t.formationPrefix}
           </p>
           <p>
-            Je transforme des idées en{" "}
-            <span className="text-(--foreground)">interfaces web rapides</span>{" "}
-            et{" "}
-            <span className="text-(--foreground)">soignées</span>.
+            {t.pitchStart}
+            <span className="text-(--foreground)">{t.pitchStrong1}</span>
+            {t.pitchAnd}
+            <span className="text-(--foreground)">{t.pitchStrong2}</span>
+            {t.pitchEnd}
           </p>
         </motion.div>
 
@@ -119,17 +123,17 @@ export function Hero() {
         >
           <Magnetic>
             <Button asChild variant="gradient" size="lg">
-              <Link href="#work" aria-label="Voir mes projets">
-                Voir mes projets
+              <Link href="#work" aria-label={t.ctaPrimary}>
+                {t.ctaPrimary}
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>
           </Magnetic>
           <Magnetic>
             <Button asChild variant="ghost" size="lg">
-              <Link href="#contact" aria-label="Me contacter">
+              <Link href="#contact" aria-label={t.ctaSecondary}>
                 <Mail className="size-4" />
-                Me contacter
+                {t.ctaSecondary}
               </Link>
             </Button>
           </Magnetic>
@@ -153,7 +157,7 @@ export function Hero() {
           className="flex flex-col items-center gap-2 text-(--muted-foreground)"
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
-            Scroll
+            {t.scrollLabel}
           </span>
           <ArrowDown className="size-4" />
         </motion.div>

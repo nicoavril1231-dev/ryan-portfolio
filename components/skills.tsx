@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 
 import { BrandIcon } from "@/components/brand-icon";
+import { useDictionary } from "@/components/locale-provider";
 import { Reveal } from "@/components/reveal";
 import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
@@ -11,6 +12,9 @@ import { skillCategories } from "@/data/skills";
 import { cn } from "@/lib/utils";
 
 export function Skills() {
+  const dict = useDictionary();
+  const t = dict.skills;
+
   return (
     <section id="skills" className="relative py-20 md:py-24">
       {/* Halo subtle derrière la grille pour l'aération */}
@@ -26,38 +30,41 @@ export function Skills() {
       <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="02"
-          eyebrow="Stack"
-          title="Les outils que j’utilise au quotidien."
-          description="Une liste honnête : ce que je connais bien, pas une vitrine de mots-clés. J’apprends vite ce qui manque selon le projet."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          description={t.description}
         />
 
         <RevealStagger
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
           stagger={0.14}
         >
-          {skillCategories.map((cat, i) => (
-            <Reveal key={cat.id} standalone={false}>
-              <Card className="flex h-full flex-col gap-5 p-5 sm:p-6">
-                <div className="flex flex-col gap-1.5">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">
-                    0{i + 1}
+          {skillCategories.map((cat, i) => {
+            const cT = t.categories[cat.id];
+            return (
+              <Reveal key={cat.id} standalone={false}>
+                <Card className="flex h-full flex-col gap-5 p-5 sm:p-6">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">
+                      0{i + 1}
+                    </div>
+                    <h3 className="text-lg font-semibold tracking-tight text-(--foreground)">
+                      {cT.title}
+                    </h3>
+                    <p className="text-xs leading-relaxed text-(--muted-foreground)">
+                      {cT.description}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold tracking-tight text-(--foreground)">
-                    {cat.title}
-                  </h3>
-                  <p className="text-xs leading-relaxed text-(--muted-foreground)">
-                    {cat.description}
-                  </p>
-                </div>
 
-                <ul className="flex flex-wrap gap-2">
-                  {cat.items.map((item) => (
-                    <SkillChip key={item.title} item={item} />
-                  ))}
-                </ul>
-              </Card>
-            </Reveal>
-          ))}
+                  <ul className="flex flex-wrap gap-2">
+                    {cat.items.map((item) => (
+                      <SkillChip key={item.title} item={item} />
+                    ))}
+                  </ul>
+                </Card>
+              </Reveal>
+            );
+          })}
         </RevealStagger>
       </div>
     </section>

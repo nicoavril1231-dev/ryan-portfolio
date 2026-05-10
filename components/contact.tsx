@@ -2,13 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Copy, Mail, Send } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { siGithub, siX } from "simple-icons";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { BrandIcon } from "@/components/brand-icon";
+import { useDictionary } from "@/components/locale-provider";
 import { Reveal } from "@/components/reveal";
 import { SectionHeader } from "@/components/section-header";
 import { Button } from "@/components/ui/button";
@@ -20,23 +21,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { linkedinIcon } from "@/lib/brand-paths";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
-
-// Schéma form — messages d'erreur en français.
-const contactSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Au moins 2 caractères")
-    .max(80, "Trop long"),
-  email: z.string().email("Email invalide"),
-  message: z
-    .string()
-    .min(10, "Au moins 10 caractères")
-    .max(2000, "2000 caractères max"),
-});
-
-type ContactValues = z.infer<typeof contactSchema>;
 
 const socials = [
   { label: "GitHub", url: site.social.github, icon: siGithub },
@@ -44,22 +31,38 @@ const socials = [
   { label: "X / Twitter", url: site.social.twitter, icon: siX },
 ] as const;
 
+// Schéma zod construit à partir des messages d'erreur du dictionnaire,
+// pour qu'ils suivent la langue active.
+function buildContactSchema(errors: Dictionary["contact"]["form"]["errors"]) {
+  return z.object({
+    name: z.string().min(2, errors.nameMin).max(80, errors.nameMax),
+    email: z.string().email(errors.emailInvalid),
+    message: z
+      .string()
+      .min(10, errors.messageMin)
+      .max(2000, errors.messageMax),
+  });
+}
+
+type ContactValues = z.infer<ReturnType<typeof buildContactSchema>>;
+
 export function Contact() {
+  const dict = useDictionary();
+  const t = dict.contact;
   const [copied, setCopied] = useState(false);
 
+  const schema = useMemo(() => buildContactSchema(t.form.errors), [t.form.errors]);
+
   const form = useForm<ContactValues>({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(schema),
     defaultValues: { name: "", email: "", message: "" },
   });
 
-  // Pas de backend pour l'instant — on confirme avec un toast et on logge.
-  // À brancher sur une route API (`app/api/contact/route.ts`) ou une server
-  // action quand ce sera nécessaire.
   const onSubmit = async (values: ContactValues) => {
     await new Promise((r) => setTimeout(r, 600));
     console.info("[contact]", values);
-    toast.success("Message envoyé !", {
-      description: "Je reviens vers toi sous 24h, promis.",
+    toast.success(t.toasts.success, {
+      description: t.toasts.successDescription,
     });
     form.reset();
   };
@@ -68,18 +71,17 @@ export function Contact() {
     try {
       await navigator.clipboard.writeText(site.email);
       setCopied(true);
-      toast("Email copié", { description: site.email });
+      toast(t.toasts.emailCopied, { description: site.email });
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Impossible de copier", {
-        description: "Sélectionne l’adresse manuellement.",
+      toast.error(t.toasts.copyError, {
+        description: t.toasts.copyErrorDescription,
       });
     }
   };
 
   return (
     <section id="contact" className="relative py-20 md:py-24">
-      {/* Halo de fond */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-[30rem] -translate-y-1/2 opacity-30"
@@ -92,9 +94,9 @@ export function Contact() {
       <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="05"
-          eyebrow="Get in touch"
-          title="Travaillons ensemble."
-          description="Une alternance, un side-project, ou juste envie d'échanger sur ton stack ? Le plus simple, c'est encore l'email."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          description={t.description}
         />
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
@@ -106,7 +108,7 @@ export function Contact() {
                 className="group flex flex-col gap-2"
               >
                 <span className="font-mono text-xs uppercase tracking-[0.25em] text-(--muted-foreground)">
-                  Email
+                  {t.emailLabel}
                 </span>
                 <span className="flex items-center gap-3 text-2xl font-semibold tracking-tight text-(--foreground) transition-colors group-hover:text-gradient md:text-3xl">
                   <Mail className="size-5 shrink-0 text-(--muted-foreground) transition-colors group-hover:text-(--accent-from)" />
@@ -118,14 +120,14 @@ export function Contact() {
                   variant="ghost"
                   size="sm"
                   onClick={copyEmail}
-                  aria-label="Copier l’email"
+                  aria-label={t.copyButtonAria}
                 >
                   {copied ? (
                     <Check className="size-3.5" />
                   ) : (
                     <Copy className="size-3.5" />
                   )}
-                  {copied ? "Copié" : "Copier"}
+                  {copied ? t.copyButtonCopied : t.copyButton}
                 </Button>
               </div>
             </Reveal>
@@ -133,7 +135,7 @@ export function Contact() {
             <Reveal delay={0.1}>
               <div className="flex flex-col gap-3">
                 <span className="font-mono text-xs uppercase tracking-[0.25em] text-(--muted-foreground)">
-                  Ailleurs
+                  {t.socialsLabel}
                 </span>
                 <ul className="flex flex-wrap items-center gap-2">
                   {socials.map((s) => (
@@ -165,13 +167,16 @@ export function Contact() {
             <Reveal delay={0.15}>
               <div className="rounded-xl border border-(--border) bg-(--card)/40 p-5 backdrop-blur-xl">
                 <p className="text-sm leading-relaxed text-(--muted-foreground)">
-                  <span className="text-(--foreground)">Disponibilité :</span>{" "}
-                  alternance dès septembre 2026 (BUT 3). Stage court d’ici là
-                  envisageable.
+                  <span className="text-(--foreground)">
+                    {t.info.availabilityLabel}
+                  </span>{" "}
+                  {t.info.availability}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-(--muted-foreground)">
-                  <span className="text-(--foreground)">Localisation :</span>{" "}
-                  Nice / Sophia-Antipolis, ou full-remote.
+                  <span className="text-(--foreground)">
+                    {t.info.locationLabel}
+                  </span>{" "}
+                  {t.info.location}
                 </p>
               </div>
             </Reveal>
@@ -184,38 +189,44 @@ export function Contact() {
               className="flex flex-col gap-5 rounded-xl border border-(--border) bg-(--card)/40 p-6 backdrop-blur-xl md:p-8"
             >
               <div className="grid gap-4 sm:grid-cols-2">
-                <FieldGroup label="Nom" error={form.formState.errors.name?.message}>
+                <FieldGroup
+                  label={t.form.name}
+                  error={form.formState.errors.name?.message}
+                >
                   <Input
                     {...form.register("name")}
-                    placeholder="Camille Martin"
+                    placeholder={t.form.namePlaceholder}
                     autoComplete="name"
                     aria-invalid={!!form.formState.errors.name}
                   />
                 </FieldGroup>
-                <FieldGroup label="Email" error={form.formState.errors.email?.message}>
+                <FieldGroup
+                  label={t.form.email}
+                  error={form.formState.errors.email?.message}
+                >
                   <Input
                     type="email"
                     {...form.register("email")}
-                    placeholder="camille@entreprise.com"
+                    placeholder={t.form.emailPlaceholder}
                     autoComplete="email"
                     aria-invalid={!!form.formState.errors.email}
                   />
                 </FieldGroup>
               </div>
               <FieldGroup
-                label="Message"
+                label={t.form.message}
                 error={form.formState.errors.message?.message}
               >
                 <Textarea
                   {...form.register("message")}
-                  placeholder="On cherche un alternant front-end, et ton portfolio nous a tapé dans l'œil…"
+                  placeholder={t.form.messagePlaceholder}
                   aria-invalid={!!form.formState.errors.message}
                 />
               </FieldGroup>
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 <p className="text-xs text-(--muted-foreground)">
-                  Je réponds sous 24h en moyenne.
+                  {t.form.footer}
                 </p>
                 <Button
                   type="submit"
@@ -223,7 +234,9 @@ export function Contact() {
                   size="md"
                   disabled={form.formState.isSubmitting}
                 >
-                  {form.formState.isSubmitting ? "Envoi…" : "Envoyer"}
+                  {form.formState.isSubmitting
+                    ? t.form.submitting
+                    : t.form.submit}
                   <Send className="size-4" />
                 </Button>
               </div>
@@ -241,8 +254,6 @@ interface FieldGroupProps {
   children: React.ReactNode;
 }
 
-// Group label + champ + erreur. Pas besoin d'un FormField complet de shadcn
-// pour 3 inputs — on garde simple.
 function FieldGroup({ label, error, children }: FieldGroupProps) {
   return (
     <label className="flex flex-col gap-1.5">

@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { siGithub, siX } from "simple-icons";
 
 import { BrandIcon } from "@/components/brand-icon";
+import { useDictionary } from "@/components/locale-provider";
 import { Reveal } from "@/components/reveal";
 import { linkedinIcon } from "@/lib/brand-paths";
 import { site } from "@/lib/site";
@@ -13,11 +16,12 @@ const socials = [
 ] as const;
 
 export function Footer() {
+  const dict = useDictionary();
   return (
     <footer className="relative border-t border-(--border) py-10">
       <Reveal className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 sm:flex-row sm:justify-between">
         <p className="text-center text-xs text-(--muted-foreground) sm:text-left">
-          © {new Date().getFullYear()} {site.name} — Built with Next.js & ☕ from Nice.
+          © {new Date().getFullYear()} {site.name} — {dict.footer.builtWith}
         </p>
 
         <ul className="flex items-center gap-1">

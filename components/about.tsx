@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Code2, MapPin, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 
+import { useDictionary } from "@/components/locale-provider";
 import { Reveal } from "@/components/reveal";
 import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
@@ -17,32 +18,45 @@ const totalTechs = skillCategories.reduce(
   0,
 );
 
-const stats = [
-  { label: "Année en cours", value: "BUT 2", icon: Sparkles },
-  { label: "Projets livrés", value: `${projects.length}+`, icon: Code2 },
-  { label: "Technos maîtrisées", value: `${totalTechs}+`, icon: MapPin },
-] as const;
-
 export function About() {
+  const dict = useDictionary();
+  const t = dict.about;
+
+  // Stats reconstruites à partir du dict + des données — la "value" du
+  // 1ᵉʳ stat (BUT 2 / Y2) vient de la traduction, les 2 autres sont
+  // dérivées des données et reçoivent leur label depuis le dict.
+  const stats = [
+    {
+      label: t.stats.year.label,
+      value: t.stats.year.value,
+      icon: Sparkles,
+    },
+    {
+      label: t.stats.projects.label,
+      value: `${projects.length}+`,
+      icon: Code2,
+    },
+    {
+      label: t.stats.techs.label,
+      value: `${totalTechs}+`,
+      icon: MapPin,
+    },
+  ] as const;
+
   return (
     <section id="about" className="relative py-20 md:py-24">
       <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="01"
-          eyebrow="About"
-          title="Bonjour, je suis Ryan."
-          description="Étudiant développeur basé à Nice. J’aime les interfaces qui semblent simples mais cachent du soin partout : transitions millimétrées, composants réutilisables, perfs au cordeau."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          description={t.description}
         />
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr] lg:gap-12">
-          {/* Photo placeholder avec ring gradient animé.
-              `items-start` empêche le stretch vertical de la cellule grid (la
-              colonne bio est plus haute → sans ça, le wrapper devenait une
-              capsule). `size-60` verrouille explicitement la taille pour que
-              les `inset-*` produisent un cercle parfait. */}
+          {/* Photo placeholder avec ring gradient animé. */}
           <Reveal className="flex items-start justify-center lg:justify-start">
             <div className="relative size-60">
-              {/* 1. Halo statique large — ambient glow qui ne bouge pas */}
               <div
                 aria-hidden
                 className="absolute -inset-6 rounded-full opacity-50 blur-3xl"
@@ -51,11 +65,6 @@ export function About() {
                     "radial-gradient(circle, var(--accent-from) 0%, transparent 70%)",
                 }}
               />
-
-              {/* 2. Anneau qui orbite — croissant lumineux ~120° avec dégradé,
-                  reste transparent. Avec un ring visible de 5 px, la rotation
-                  saute aux yeux. Duration 6 s, linéaire pour un mouvement
-                  calme et continu. */}
               <motion.div
                 aria-hidden
                 className="absolute inset-0 rounded-full"
@@ -66,9 +75,6 @@ export function About() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
               />
-
-              {/* 3. Halo plus doux qui suit le croissant — accentue la traînée
-                  comme une "comète" autour du nom */}
               <motion.div
                 aria-hidden
                 className="absolute -inset-1 rounded-full opacity-60 blur-md"
@@ -79,9 +85,6 @@ export function About() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
               />
-
-              {/* 4. Avatar : 5 px plus petit que l'anneau → laisse 5 px de ring
-                  visible. Remplace par <Image src="/avatar.jpg" fill /> plus tard. */}
               <div className="absolute inset-[5px] flex items-center justify-center overflow-hidden rounded-full bg-(--card)">
                 <div
                   className="absolute inset-0 opacity-30"
@@ -99,9 +102,6 @@ export function About() {
 
           {/* Bio + stats */}
           <div className="flex flex-col gap-6">
-            {/* RevealStagger orchestre la cascade des paragraphes : un
-                seul observer, déclenchement quand 30% de la bio est visible,
-                puis chaque paragraphe cascade. */}
             <RevealStagger
               className="flex flex-col gap-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg"
               stagger={0.16}
@@ -109,39 +109,23 @@ export function About() {
             >
               <Reveal standalone={false}>
                 <p>
-                  Je suis en{" "}
-                  <span className="text-(--foreground)">
-                    deuxième année de BUT Informatique
-                  </span>{" "}
-                  à l’IUT Nice Côte d’Azur. Mon truc, c’est de prendre des
-                  problèmes concrets et d’en sortir des produits utilisables —
-                  pas des prototypes qui crashent au premier clic.
+                  {t.bio.p1Start}
+                  <span className="text-(--foreground)">{t.bio.p1Strong}</span>
+                  {t.bio.p1End}
                 </p>
               </Reveal>
               <Reveal standalone={false}>
-                <p>
-                  En parallèle des cours, je passe énormément de temps à
-                  bricoler des side-projects : un bot Discord pour modérer les
-                  serveurs de potes, un tracker de stages pour la promo, une
-                  app kanban pour mieux gérer mes sprints perso. Chaque projet,
-                  c’est l’occasion d’apprendre une stack ou un pattern que je
-                  ne maîtrisais pas.
-                </p>
+                <p>{t.bio.p2}</p>
               </Reveal>
               <Reveal standalone={false}>
                 <p>
-                  Je cherche maintenant{" "}
-                  <span className="text-(--foreground)">
-                    une alternance pour ma 3ᵉ année
-                  </span>{" "}
-                  où je pourrai contribuer à un produit qui a du caractère, aux
-                  côtés d’une équipe qui prend le craft au sérieux.
+                  {t.bio.p3Start}
+                  <span className="text-(--foreground)">{t.bio.p3Strong}</span>
+                  {t.bio.p3End}
                 </p>
               </Reveal>
             </RevealStagger>
 
-            {/* 3 stats en rangée → RevealStagger garantit la cascade
-                horizontale, un seul observer pour tout le groupe. */}
             <RevealStagger
               className="grid grid-cols-3 gap-3"
               stagger={0.14}

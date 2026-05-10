@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState, type MouseEvent } from "react";
 
+import { useDictionary } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 
 // Bascule de thème via la View Transitions API : le navigateur fait un
@@ -78,6 +79,7 @@ function transitionTheme(
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const dict = useDictionary();
   const [mounted, setMounted] = useState(false);
 
   // Pattern recommandé par next-themes — on attend l'hydratation pour lire
@@ -102,7 +104,11 @@ export function ThemeToggle() {
     <Button
       variant="icon"
       size="icon"
-      aria-label={`Activer le thème ${next}`}
+      aria-label={
+        next === "light"
+          ? dict.themeToggle.enableLight
+          : dict.themeToggle.enableDark
+      }
       onClick={handleClick}
       className="relative"
     >

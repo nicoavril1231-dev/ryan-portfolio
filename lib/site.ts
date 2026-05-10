@@ -1,19 +1,12 @@
-// Source unique pour les infos du site : titre, méta, liens, contact.
-// Tout le reste de l'UI lit depuis ici.
+// Source unique pour les infos universelles (non traduites) du site :
+// nom, email, liens sociaux, navigation. Tout ce qui dépend de la langue
+// vit dans `lib/i18n/dictionaries/{fr,en}.ts`.
 
 export const site = {
   name: "Ryan Avril",
   initials: "RA",
-  role: "Étudiant développeur",
-  location: "Nice, France",
-  locationFlag: "🇫🇷",
-  formation: "BUT Informatique — IUT Nice Côte d'Azur",
-  year: "2ᵉ année",
   email: "avril.ryan.pro@gmail.com",
-  availability: "Disponible pour une alternance dès septembre 2026",
-  description:
-    "Étudiant en BUT Informatique à Nice, je transforme des idées en interfaces web rapides et soignées.",
-  url: "https://ryanavril.dev",
+  url: "https://ryan-portfolio-xi-two.vercel.app",
   social: {
     github: "https://github.com/ryanavril",
     linkedin: "https://linkedin.com/in/ryanavril",
@@ -23,12 +16,13 @@ export const site = {
 
 export type SiteConfig = typeof site;
 
-// Sections ancrées dans la nav. `iconKey` mappe vers une icône SVG animée
-// définie dans components/nav-icons.tsx — pas d'emoji, pour rester premium.
+// Sections ancrées dans la nav. `labelKey` pointe vers `dict.nav.*`.
 export const navLinks = [
-  { href: "#work", label: "Work", iconKey: "work" },
-  { href: "#about", label: "About", iconKey: "about" },
-  { href: "#skills", label: "Skills", iconKey: "skills" },
-  { href: "#journey", label: "Journey", iconKey: "journey" },
-  { href: "#contact", label: "Contact", iconKey: "contact" },
+  { href: "#work", labelKey: "work", iconKey: "work" },
+  { href: "#about", labelKey: "about", iconKey: "about" },
+  { href: "#skills", labelKey: "skills", iconKey: "skills" },
+  { href: "#journey", labelKey: "journey", iconKey: "journey" },
+  { href: "#contact", labelKey: "contact", iconKey: "contact" },
 ] as const;
+
+export type NavLinkLabelKey = (typeof navLinks)[number]["labelKey"];

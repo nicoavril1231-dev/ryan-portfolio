@@ -24,8 +24,7 @@ import {
 import type { BrandPath } from "@/components/brand-icon";
 import { javaIcon, vscodeIcon } from "@/lib/brand-paths";
 
-// Helper minimal pour ne garder que ce dont on a besoin (path, hex, title)
-// et permettre d'overrider le label affiché.
+// Helper minimal pour ne garder que ce dont on a besoin.
 const tech = (
   icon: { title: string; path: string; hex: string },
   override?: string,
@@ -36,18 +35,19 @@ const tech = (
   label: override ?? icon.title,
 });
 
+// Identifiants des catégories — référencés dans le dict via la même clé.
+export type SkillCategoryId = "frontend" | "backend" | "data" | "tools";
+
 export interface SkillCategory {
-  id: string;
-  title: string;
-  description: string;
+  id: SkillCategoryId;
   items: ReturnType<typeof tech>[];
 }
 
+// Le titre et la description de chaque catégorie viennent du dictionnaire
+// (cf. lib/i18n/dictionaries/{fr,en}.ts → skills.categories.*).
 export const skillCategories: readonly SkillCategory[] = [
   {
     id: "frontend",
-    title: "Frontend",
-    description: "Construire des interfaces fluides et accessibles.",
     items: [
       tech(siReact),
       tech(siNextdotjs, "Next.js"),
@@ -59,11 +59,9 @@ export const skillCategories: readonly SkillCategory[] = [
   },
   {
     id: "backend",
-    title: "Backend",
-    description: "APIs propres, modèles cohérents, perf au rendez-vous.",
     items: [
       tech(siNodedotjs, "Node.js"),
-      // Java retiré de simple-icons → fallback hardcodé (cf. brand-paths).
+      // Java retiré de simple-icons → fallback hardcodé.
       { ...javaIcon, label: "Java" },
       tech(siJavascript, "JavaScript"),
       tech(siPython, "Python"),
@@ -74,8 +72,6 @@ export const skillCategories: readonly SkillCategory[] = [
   },
   {
     id: "data",
-    title: "Bases de données",
-    description: "Modélisation, requêtes, optimisation.",
     items: [
       tech(siPostgresql, "PostgreSQL"),
       tech(siMysql, "MySQL"),
@@ -84,8 +80,6 @@ export const skillCategories: readonly SkillCategory[] = [
   },
   {
     id: "tools",
-    title: "Outils",
-    description: "Workflow dev quotidien.",
     items: [
       tech(siGit, "Git"),
       tech(siDocker, "Docker"),

@@ -9,8 +9,10 @@ import {
 } from "motion/react";
 import Link from "next/link";
 import { type PointerEvent, useRef } from "react";
+import { siGithub } from "simple-icons";
 
 import { BrandIcon } from "@/components/brand-icon";
+import { useDictionary } from "@/components/locale-provider";
 import { ProjectPreview } from "@/components/project-preview";
 import { Reveal } from "@/components/reveal";
 import { RevealStagger } from "@/components/reveal-stagger";
@@ -18,18 +20,21 @@ import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { type Project, projects } from "@/data/projects";
-import { siGithub } from "simple-icons";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
 export function Projects() {
+  const dict = useDictionary();
+  const t = dict.projects;
+
   return (
     <section id="work" className="relative py-20 md:py-24">
       <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6">
         <SectionHeader
           index="03"
-          eyebrow="Selected work"
-          title="Quelques projets récents."
-          description="Un mix de side-projects, projets universitaires et missions freelance. Le code est sur GitHub, dispo en demo quand c'est possible."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          description={t.description}
         />
 
         <RevealStagger
@@ -43,7 +48,7 @@ export function Projects() {
               standalone={false}
               className={cn(project.featured && "md:col-span-2")}
             >
-              <ProjectCard project={project} />
+              <ProjectCard project={project} dict={dict} />
             </Reveal>
           ))}
         </RevealStagger>
@@ -54,12 +59,15 @@ export function Projects() {
 
 interface ProjectCardProps {
   project: Project;
+  dict: Dictionary;
 }
 
 // Carte projet avec tilt 3D au survol — perspective + rotateX/Y pilotés par
 // la position du curseur, lissés via spring.
-function ProjectCard({ project }: ProjectCardProps) {
+function ProjectCard({ project, dict }: ProjectCardProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = dict.projects;
+  const tProject = t.items[project.slug];
 
   // Tilt 3D : x/y positions normalisées → springs lissés → deg.
   const x = useMotionValue(0);
@@ -80,7 +88,6 @@ function ProjectCard({ project }: ProjectCardProps) {
     const rect = el.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width;
     const py = (e.clientY - rect.top) / rect.height;
-    // Tilt en deg : ±3° max, délibérément subtil.
     x.set((px - 0.5) * 6);
     y.set(-(py - 0.5) * 6);
     glowX.set(px * 100);
@@ -132,9 +139,9 @@ function ProjectCard({ project }: ProjectCardProps) {
                   {project.year}
                 </span>
               </div>
-              {project.context && (
+              {tProject.context && (
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted-foreground)">
-                  {project.context}
+                  {tProject.context}
                 </span>
               )}
             </div>
@@ -144,10 +151,10 @@ function ProjectCard({ project }: ProjectCardProps) {
           {/* Tagline + description */}
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-(--foreground) md:text-base">
-              {project.tagline}
+              {tProject.tagline}
             </p>
             <p className="text-sm leading-relaxed text-(--muted-foreground)">
-              {project.description}
+              {tProject.description}
             </p>
           </div>
 
@@ -167,17 +174,19 @@ function ProjectCard({ project }: ProjectCardProps) {
             {project.links.map((link) => {
               const isGithub = link.type === "github";
               const Icon = isGithub ? null : ExternalLink;
+              const linkLabel =
+                link.type === "demo"
+                  ? t.linkLabels.demo
+                  : link.type === "github"
+                    ? t.linkLabels.github
+                    : t.linkLabels.external;
               return (
                 <Link
                   key={link.url}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={
-                    isGithub
-                      ? `Voir le code de ${project.title} sur GitHub`
-                      : `Voir la démo de ${project.title}`
-                  }
+                  aria-label={`${project.title} — ${linkLabel}`}
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border border-(--border) bg-(--muted)/40 px-3 py-1.5 text-xs font-medium",
                     "text-(--muted-foreground) transition-colors",
@@ -189,11 +198,7 @@ function ProjectCard({ project }: ProjectCardProps) {
                   ) : (
                     Icon && <Icon className="size-3.5" />
                   )}
-                  {link.type === "demo"
-                    ? "Demo"
-                    : link.type === "github"
-                      ? "Code"
-                      : "Lien"}
+                  {linkLabel}
                 </Link>
               );
             })}
