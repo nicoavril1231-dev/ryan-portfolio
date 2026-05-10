@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 
 import { Reveal } from "@/components/reveal";
+import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
 import { Card } from "@/components/ui/card";
 import { timeline } from "@/data/timeline";
@@ -30,10 +31,14 @@ export function Timeline() {
             }}
           />
 
-          <ol className="flex flex-col gap-8 sm:gap-10">
-            {timeline.map((step, i) => (
-              <Reveal key={step.title} delay={i * 0.08}>
-                <li className="relative">
+          <RevealStagger
+            className="flex flex-col gap-8 sm:gap-10"
+            stagger={0.16}
+            amount={0.05}
+          >
+            {timeline.map((step) => (
+              <Reveal key={step.title} standalone={false}>
+                <div className="relative">
                   {/* Point sur la ligne */}
                   <span
                     aria-hidden
@@ -88,10 +93,10 @@ export function Timeline() {
                       {step.description}
                     </p>
                   </Card>
-                </li>
+                </div>
               </Reveal>
             ))}
-          </ol>
+          </RevealStagger>
         </div>
       </div>
     </section>

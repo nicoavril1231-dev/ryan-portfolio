@@ -1,35 +1,46 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { type ReactNode } from "react";
 
-// Wrapper d'apparition — déclenchement par Intersection Observer (whileInView)
-// puis animation à durée fixe d'environ 1 s. Indépendant de la vitesse de
-// scroll : même sur un flick rapide, l'animation a le temps de se dérouler
-// pleinement après l'entrée de l'élément dans le viewport.
-//
-// Le stagger se fait via `delay` en secondes (transition delay natif), donc
-// les cards d'une même rangée cascadent visiblement.
-//
-// Respecte `prefers-reduced-motion`.
+// Variants partagées : utilisable soit en mode standalone (whileInView
+// déclenche tout), soit comme enfant d'un <RevealStagger> qui pilote
+// l'animation via le tree des variants (un seul observer pour tout le
+// groupe + cascade naturelle via staggerChildren).
+const fadeUpVariants: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.85,
+      ease: [0.16, 1, 0.3, 1] as const, // expo-out
+    },
+  },
+};
+
 interface RevealProps {
   children: ReactNode;
   className?: string;
-  /** Distance verticale initiale en px. */
-  y?: number;
-  /** Délai en secondes avant le début de l'animation (utile pour stagger). */
+  /**
+   * Délai en secondes (mode standalone uniquement). Ignoré quand le
+   * Reveal est enfant d'un <RevealStagger>.
+   */
   delay?: number;
-  /** Si true (défaut), l'animation ne joue qu'une fois (puis l'élément
-   *  reste à son état final). */
+  /** Si true (défaut), déclenche son propre observer. Si false, attend
+   *  que le parent variant tree pilote son animation. */
+  standalone?: boolean;
+  /** @deprecated réservé compat */
+  y?: number;
+  /** @deprecated réservé compat */
   once?: boolean;
 }
 
 export function Reveal({
   children,
   className,
-  y = 60,
   delay = 0,
-  once = true,
+  standalone = true,
 }: RevealProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -37,29 +48,27 @@ export function Reveal({
     return <div className={className}>{children}</div>;
   }
 
+  if (standalone) {
+    // Mode autonome : observer + animation déclenchée à l'entrée du
+    // viewport. Trigger à 25 % de visibilité pour que l'élément soit
+    // bien dans le champ de vision avant que ça commence.
+    return (
+      <motion.div
+        className={className}
+        variants={fadeUpVariants}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ delay }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  // Mode "child" : le parent (RevealStagger) pilote via variant tree.
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{
-        once,
-        // Déclenche quand 15 % de l'élément est visible — c'est-à-dire dès
-        // que sa partie haute apparaît clairement par le bas du viewport.
-        amount: 0.15,
-        // Le coin bas du viewport est rabaissé de 8 % pour que l'élément
-        // soit déjà bien visible avant de déclencher.
-        margin: "0px 0px -8% 0px",
-      }}
-      transition={{
-        // Durée volontairement longue pour qu'on perçoive le mouvement même
-        // si on scrolle vite. Easing expo-out — démarre vif, finit en
-        // douceur, parfait pour un "glissement vers sa place".
-        duration: 1,
-        ease: [0.16, 1, 0.3, 1] as const,
-        delay,
-      }}
-    >
+    <motion.div className={className} variants={fadeUpVariants}>
       {children}
     </motion.div>
   );

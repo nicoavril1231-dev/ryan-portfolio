@@ -13,6 +13,7 @@ import { type PointerEvent, useRef } from "react";
 import { BrandIcon } from "@/components/brand-icon";
 import { ProjectPreview } from "@/components/project-preview";
 import { Reveal } from "@/components/reveal";
+import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -31,17 +32,21 @@ export function Projects() {
           description="Un mix de side-projects, projets universitaires et missions freelance. Le code est sur GitHub, dispo en demo quand c'est possible."
         />
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project, i) => (
+        <RevealStagger
+          className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+          stagger={0.14}
+          amount={0.1}
+        >
+          {projects.map((project) => (
             <Reveal
               key={project.slug}
-              delay={i * 0.08}
+              standalone={false}
               className={cn(project.featured && "md:col-span-2")}
             >
               <ProjectCard project={project} />
             </Reveal>
           ))}
-        </div>
+        </RevealStagger>
       </div>
     </section>
   );

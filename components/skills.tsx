@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 
 import { BrandIcon } from "@/components/brand-icon";
 import { Reveal } from "@/components/reveal";
+import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
 import { Card } from "@/components/ui/card";
 import { skillCategories } from "@/data/skills";
@@ -30,9 +31,12 @@ export function Skills() {
           description="Une liste honnête : ce que je connais bien, pas une vitrine de mots-clés. J’apprends vite ce qui manque selon le projet."
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <RevealStagger
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          stagger={0.14}
+        >
           {skillCategories.map((cat, i) => (
-            <Reveal key={cat.id} delay={i * 0.08}>
+            <Reveal key={cat.id} standalone={false}>
               <Card className="flex h-full flex-col gap-5 p-5 sm:p-6">
                 <div className="flex flex-col gap-1.5">
                   <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted-foreground)">
@@ -54,7 +58,7 @@ export function Skills() {
               </Card>
             </Reveal>
           ))}
-        </div>
+        </RevealStagger>
       </div>
     </section>
   );

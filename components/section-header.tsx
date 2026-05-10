@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
 import { Reveal } from "./reveal";
+import { RevealStagger } from "./reveal-stagger";
 
 // Header de section : numéro mono + titre + sous-titre optionnel.
-// Chaque sous-bloc est dans son propre Reveal pour cascader au scroll
-// (eyebrow d'abord, puis titre, puis description).
+// RevealStagger orchestre la cascade — un seul Intersection Observer
+// pour les 3 lignes, garantit qu'elles cascadent dans l'ordre.
 
 interface SectionHeaderProps {
   index: string;
@@ -24,14 +25,16 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div
+    <RevealStagger
       className={cn(
         "flex flex-col gap-3",
         align === "center" && "items-center text-center",
         className,
       )}
+      stagger={0.15}
+      amount={0.4}
     >
-      <Reveal>
+      <Reveal standalone={false}>
         <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-(--muted-foreground)">
           <span className="text-(--foreground)">{index}</span>
           {eyebrow && (
@@ -42,13 +45,13 @@ export function SectionHeader({
           )}
         </div>
       </Reveal>
-      <Reveal delay={0.05}>
+      <Reveal standalone={false}>
         <h2 className="text-balance text-4xl font-semibold leading-tight tracking-tight md:text-5xl lg:text-6xl">
           {title}
         </h2>
       </Reveal>
       {description && (
-        <Reveal delay={0.1}>
+        <Reveal standalone={false}>
           <p
             className={cn(
               "max-w-2xl text-base text-(--muted-foreground) md:text-lg",
@@ -59,6 +62,6 @@ export function SectionHeader({
           </p>
         </Reveal>
       )}
-    </div>
+    </RevealStagger>
   );
 }

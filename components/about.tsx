@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Code2, MapPin, Sparkles } from "lucide-react";
 
 import { Reveal } from "@/components/reveal";
+import { RevealStagger } from "@/components/reveal-stagger";
 import { SectionHeader } from "@/components/section-header";
 import { Card } from "@/components/ui/card";
 import { projects } from "@/data/projects";
@@ -98,10 +99,15 @@ export function About() {
 
           {/* Bio + stats */}
           <div className="flex flex-col gap-6">
-            {/* Chaque paragraphe a son propre Reveal pour cascader
-                naturellement au scroll (positions Y différentes). */}
-            <div className="flex flex-col gap-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg">
-              <Reveal>
+            {/* RevealStagger orchestre la cascade des paragraphes : un
+                seul observer, déclenchement quand 30% de la bio est visible,
+                puis chaque paragraphe cascade. */}
+            <RevealStagger
+              className="flex flex-col gap-4 text-base leading-relaxed text-(--muted-foreground) md:text-lg"
+              stagger={0.16}
+              amount={0.3}
+            >
+              <Reveal standalone={false}>
                 <p>
                   Je suis en{" "}
                   <span className="text-(--foreground)">
@@ -112,7 +118,7 @@ export function About() {
                   pas des prototypes qui crashent au premier clic.
                 </p>
               </Reveal>
-              <Reveal>
+              <Reveal standalone={false}>
                 <p>
                   En parallèle des cours, je passe énormément de temps à
                   bricoler des side-projects : un bot Discord pour modérer les
@@ -122,7 +128,7 @@ export function About() {
                   ne maîtrisais pas.
                 </p>
               </Reveal>
-              <Reveal>
+              <Reveal standalone={false}>
                 <p>
                   Je cherche maintenant{" "}
                   <span className="text-(--foreground)">
@@ -132,13 +138,17 @@ export function About() {
                   côtés d’une équipe qui prend le craft au sérieux.
                 </p>
               </Reveal>
-            </div>
+            </RevealStagger>
 
-            {/* Chaque stat dans son propre Reveal avec stagger : les 3
-                cards sont en rangée (même Y) → le delay décale leur début. */}
-            <div className="grid grid-cols-3 gap-3">
-              {stats.map((stat, i) => (
-                <Reveal key={stat.label} delay={i * 0.1}>
+            {/* 3 stats en rangée → RevealStagger garantit la cascade
+                horizontale, un seul observer pour tout le groupe. */}
+            <RevealStagger
+              className="grid grid-cols-3 gap-3"
+              stagger={0.14}
+              amount={0.5}
+            >
+              {stats.map((stat) => (
+                <Reveal key={stat.label} standalone={false}>
                   <Card className="flex flex-col gap-2 p-4 transition-colors hover:border-(--border-strong) sm:p-5">
                     <stat.icon className="size-4 text-(--muted-foreground)" />
                     <div className="text-2xl font-semibold tracking-tight text-(--foreground) sm:text-3xl">
@@ -150,7 +160,7 @@ export function About() {
                   </Card>
                 </Reveal>
               ))}
-            </div>
+            </RevealStagger>
           </div>
         </div>
       </div>
