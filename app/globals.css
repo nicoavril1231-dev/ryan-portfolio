@@ -5,6 +5,28 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ------------------------------------------------------------------
+   View Transitions API — bascule de thème en "vague circulaire"
+   ------------------------------------------------------------------
+   Le ThemeToggle déclenche `document.startViewTransition()` puis anime
+   le clip-path du nouveau snapshot via WAAPI. Ici on désactive le
+   crossfade par défaut + on empile correctement old/new pour que le
+   cercle qui s'étend soit visible.
+   Browsers sans support (Firefox actuel) → bascule instantanée. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* ------------------------------------------------------------------
    Design tokens
    ------------------------------------------------------------------ */
 :root {
