@@ -17,10 +17,12 @@ export const site = {
 export type SiteConfig = typeof site;
 
 // Sections ancrées dans la nav. `labelKey` pointe vers `dict.nav.*`.
+// Ordre = ordre d'apparition dans `app/page.tsx` (About → Skills → Work
+// → Journey → Contact).
 export const navLinks = [
-  { href: "#work", labelKey: "work", iconKey: "work" },
   { href: "#about", labelKey: "about", iconKey: "about" },
   { href: "#skills", labelKey: "skills", iconKey: "skills" },
+  { href: "#work", labelKey: "work", iconKey: "work" },
   { href: "#journey", labelKey: "journey", iconKey: "journey" },
   { href: "#contact", labelKey: "contact", iconKey: "contact" },
 ] as const;
