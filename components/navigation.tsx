@@ -71,14 +71,11 @@ function DesktopSidebar({
         ))}
       </div>
 
-      {/* Bas : theme toggle + locale toggle + indicator */}
-      <div className="flex flex-col items-center gap-2 px-3">
-        <ThemeToggle />
-        <LocaleToggle />
-        <div
-          aria-hidden
-          className="h-6 w-px bg-(--border-strong) opacity-60"
-        />
+      {/* Bas : segmented toggles (theme + locale) en orientation verticale
+          pour tenir dans la sidebar étroite (32 px de large par capsule). */}
+      <div className="flex flex-col items-center gap-3 px-3">
+        <ThemeToggle orientation="vertical" />
+        <LocaleToggle orientation="vertical" />
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-(--muted-foreground) opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           v 1.0
         </span>
@@ -174,8 +171,8 @@ function MobileBottomBar({
         />
       ))}
       <span aria-hidden className="mx-1 h-6 w-px bg-(--border-strong)" />
-      <ThemeToggle />
-      <LocaleToggle compact />
+      <ThemeToggle orientation="horizontal" />
+      <LocaleToggle orientation="horizontal" />
     </motion.nav>
   );
 }
